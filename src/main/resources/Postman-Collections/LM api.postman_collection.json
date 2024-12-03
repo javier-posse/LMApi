@@ -1,0 +1,151 @@
+{
+	"info": {
+		"_postman_id": "314a39ed-6ed3-4517-866c-7931e907cd66",
+		"name": "LM api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10634718"
+	},
+	"item": [
+		{
+			"name": "Author",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:6363/author/653",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "6363",
+					"path": [
+						"author",
+						"653"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Collection",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:6363/collection/362",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "6363",
+					"path": [
+						"collection",
+						"362"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SpPublisher",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:6363/spPublisher/193",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "6363",
+					"path": [
+						"spPublisher",
+						"193"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "JpPublisher",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:6363/jpPublisher/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "6363",
+					"path": [
+						"jpPublisher",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Series",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:6363/series/4294",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "6363",
+					"path": [
+						"series",
+						"4294"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Month releases",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:6363/monthReleases/12/2024",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "6363",
+					"path": [
+						"monthReleases",
+						"12",
+						"2024"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Year releases",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:6363/yearReleases/2024",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "6363",
+					"path": [
+						"yearReleases",
+						"2024"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -22,3 +22,9 @@ La subo con el beneplácito de Listado Manga.
 
 ## Licencia
 Para más detalles, consulta el archivo LICENSE.
+
+## Uso
+Una vez ejecutado como se prefiera, se pueden encontrar las llamadas de postman en /src/main/resources/Postman_Collections
+
+## Errores conocidos
+La funcionalidad de la serie debe ser reescrita casi por completo.

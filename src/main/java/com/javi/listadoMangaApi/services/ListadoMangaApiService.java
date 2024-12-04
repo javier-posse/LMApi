@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.javi.listadoMangaApi.commons.ExcelGenerator;
 import com.javi.listadoMangaApi.dto.AuthorDto;
 import com.javi.listadoMangaApi.dto.CollectionDto;
 import com.javi.listadoMangaApi.dto.JpPublisherDto;
@@ -59,13 +60,16 @@ public class ListadoMangaApiService {
 	return monthReleasesScraper.scrapMonthReleasesPage(month, year);
     }
 
-    public MonthReleasesDto searchYearReleases(int year) throws GenericException {
+    public MonthReleasesDto searchYearReleases(int year, boolean generateExcel) throws GenericException {
 	MonthReleasesDto yearReleases = new MonthReleasesDto("Novedades " + year, new ArrayList<>());
-	for (int i = 1; i < 12; i++) {
+	for (int i = 1; i < 13; i++) {
 	    yearReleases.getSeriesReleases()
 		    .addAll(monthReleasesScraper.scrapMonthReleasesPage(i, year).getSeriesReleases().stream()
 			    .filter(seriesRelease -> seriesRelease.isFirstRelease() || seriesRelease.isOnlyVolume())
 			    .collect(Collectors.toList()));
+	}
+	if (generateExcel) {
+	    ExcelGenerator.generateExcelReleases(year, yearReleases.getSeriesReleases());
 	}
 
 	return yearReleases;

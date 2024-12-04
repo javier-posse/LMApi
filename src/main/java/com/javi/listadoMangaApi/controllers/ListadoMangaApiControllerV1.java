@@ -3,6 +3,7 @@ package com.javi.listadoMangaApi.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.javi.listadoMangaApi.dto.AuthorDto;
@@ -50,8 +51,9 @@ public class ListadoMangaApiControllerV1 {
     }
 
     @GetMapping("/yearReleases/{year}")
-    public MonthReleasesDto getMonthReleases(@PathVariable int year) throws GenericException {
-	return apiService.searchYearReleases(year);
+    public MonthReleasesDto getMonthReleases(@PathVariable int year, @RequestParam boolean generateExcel)
+	    throws GenericException {
+	return apiService.searchYearReleases(year, generateExcel);
     }
 
 }

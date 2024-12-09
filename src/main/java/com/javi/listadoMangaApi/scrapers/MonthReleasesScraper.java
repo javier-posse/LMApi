@@ -51,6 +51,7 @@ public class MonthReleasesScraper {
 		    boolean firstRelease = false;
 		    boolean onlyVolume = false;
 		    String date = null;
+		    String publisher = null;
 		    int cont = 0;
 		    if (children.get(i).tagName().equals("br")) {
 			while (children.get(i + cont).nextElementSibling() != null
@@ -74,8 +75,9 @@ public class MonthReleasesScraper {
 			    // unico que se me ha ocurrido
 			    Elements allElements = doc.getAllElements();
 			    for (Element element : allElements) {
-				if (element.tagName().equals("h2")) {
-				    date = element.text();
+				if (element.attr("style").equals("vertical-align: middle;")) {
+				    publisher = element.getElementsByTag("h2").get(0).text();
+				    date = element.getElementsByTag("h2").get(1).text();
 				} else if (element.equals(children.get(i))) {
 				    break;
 				}
@@ -95,8 +97,8 @@ public class MonthReleasesScraper {
 				}
 			    }
 			    SeriesReleaseDto seriesReleaseDto = new SeriesReleaseDto(releaseId, releaseName, date,
-				    releaseAuthId, releaseAuthName, releaseArtistId, releaseArtistName, lastVolume,
-				    firstRelease, onlyVolume);
+				    publisher, releaseAuthId, releaseAuthName, releaseArtistId, releaseArtistName,
+				    lastVolume, firstRelease, onlyVolume);
 			    seriesReleases.add(seriesReleaseDto);
 			}
 		    }

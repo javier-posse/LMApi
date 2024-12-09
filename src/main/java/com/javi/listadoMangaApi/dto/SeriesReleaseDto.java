@@ -14,6 +14,7 @@ public class SeriesReleaseDto {
     @NotNull(message = "Name cannot be null")
     private String name;
     private String releaseDate;
+    private String publisherName;
     private int authorId;
     private String authorName;
     private int artistId;

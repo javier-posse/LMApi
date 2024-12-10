@@ -11,7 +11,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
-import com.javi.listadoMangaApi.commons.CommonScrapers;
+import com.javi.listadoMangaApi.commons.CommonUtils;
 import com.javi.listadoMangaApi.constants.UrlConstants;
 import com.javi.listadoMangaApi.dto.MonthReleasesDto;
 import com.javi.listadoMangaApi.dto.SeriesReleaseDto;
@@ -61,13 +61,13 @@ public class MonthReleasesScraper {
 			if (cont > 0) {
 			    for (int c = 1; c < cont + 1; c++) {
 				if (c == 1) {
-				    releaseId = CommonScrapers.getLinkId(children.get(i + c));
+				    releaseId = CommonUtils.getLinkId(children.get(i + c));
 				    releaseName = children.get(i + c).text();
 				} else if (c == 2) {
-				    releaseAuthId = CommonScrapers.getLinkId(children.get(i + c));
+				    releaseAuthId = CommonUtils.getLinkId(children.get(i + c));
 				    releaseAuthName = children.get(i + c).text();
 				} else if (c == 3) {
-				    releaseArtistId = CommonScrapers.getLinkId(children.get(i + c));
+				    releaseArtistId = CommonUtils.getLinkId(children.get(i + c));
 				    releaseArtistName = children.get(i + c).text();
 				}
 			    }

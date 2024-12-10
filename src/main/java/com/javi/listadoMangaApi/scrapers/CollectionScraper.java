@@ -8,7 +8,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
 
-import com.javi.listadoMangaApi.commons.CommonScrapers;
+import com.javi.listadoMangaApi.commons.CommonUtils;
 import com.javi.listadoMangaApi.constants.UrlConstants;
 import com.javi.listadoMangaApi.dto.CollectionDto;
 import com.javi.listadoMangaApi.dto.SeriesSimplifiedDto;
@@ -32,7 +32,7 @@ public class CollectionScraper {
 	    String collectionName = doc.getElementsByClass("cen").select("h2").first().text();
 
 	    // get series
-	    List<SeriesSimplifiedDto> series = CommonScrapers.getSeriesList(doc);
+	    List<SeriesSimplifiedDto> series = CommonUtils.getSeriesList(doc);
 
 	    collectionDto = new CollectionDto(id, collectionName, series);
 

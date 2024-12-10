@@ -10,7 +10,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
-import com.javi.listadoMangaApi.commons.CommonScrapers;
+import com.javi.listadoMangaApi.commons.CommonUtils;
 import com.javi.listadoMangaApi.constants.UrlConstants;
 import com.javi.listadoMangaApi.dto.SeriesDto;
 import com.javi.listadoMangaApi.dto.VolumeDto;
@@ -42,7 +42,7 @@ public class SeriesScraper {
 		}
 	    }
 	    linkData.forEach(data -> {
-		idCollector.add(CommonScrapers.getLinkId(data));
+		idCollector.add(CommonUtils.getLinkId(data));
 		linkCollector.add(data.text());
 	    });
 

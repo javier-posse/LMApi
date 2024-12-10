@@ -12,6 +12,7 @@ import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DataValidationHelper;
@@ -47,7 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ExcelGenerator {
-    public static String generateExcelReleases(int year, List<SeriesReleaseDto> seriesReleases)
+    public static String generateExcelReleases(int year, List<SeriesReleaseDto> seriesReleases, int lastVolumeCount)
 	    throws GenericException {
 
 	Workbook excel = new XSSFWorkbook();
@@ -101,6 +102,17 @@ public class ExcelGenerator {
 	style.setVerticalAlignment(VerticalAlignment.CENTER);
 	style.setBorderBottom(BorderStyle.THIN);
 
+	// lineas de fechas
+	CellStyle cellStyleDate = excel.createCellStyle();
+	CreationHelper createHelper = excel.getCreationHelper();
+	cellStyleDate.setDataFormat(createHelper.createDataFormat().getFormat("dd MMMM yyyy"));
+	cellStyleDate.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+	cellStyleDate.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+	cellStyleDate.setWrapText(true);
+	cellStyleDate.setAlignment(HorizontalAlignment.CENTER);
+	cellStyleDate.setVerticalAlignment(VerticalAlignment.CENTER);
+	cellStyleDate.setBorderBottom(BorderStyle.THIN);
+
 	// Validaciones para crear el drop-down
 	String[] options = { "Tomo único", "Primer tomo", "Último tomo" };
 
@@ -120,8 +132,10 @@ public class ExcelGenerator {
 	    cell.setCellStyle(style);
 
 	    cell = row.createCell(1);
-	    cell.setCellValue(seriesReleases.get(i).getReleaseDate());
-	    cell.setCellStyle(style);
+	    // Convierto la fecha a formato fecha de Java
+	    String releaseDate = seriesReleases.get(i).getReleaseDate();
+	    cell.setCellValue(CommonUtils.fullDateConverter(releaseDate));
+	    cell.setCellStyle(cellStyleDate);
 
 	    cell = row.createCell(2);
 	    cell.setCellValue(seriesReleases.get(i).getPublisherName());
@@ -226,6 +240,13 @@ public class ExcelGenerator {
 	Cell cellFirstVolumeCount = row.createCell(5);
 	cellFirstVolumeCount.setCellValue(firstVolumeCont);
 
+	Row row6 = sheetStatistics.getRow(6);
+	Cell cellLastVolumeLabel = row6.createCell(4);
+	cellLastVolumeLabel.setCellValue("Total series terminadas: ");
+	cellLastVolumeLabel.setCellStyle(headerStyle);
+	Cell cellLastVolumeCount = row6.createCell(5);
+	cellLastVolumeCount.setCellValue(lastVolumeCount);
+
 	// Generacion de grafico editoriales
 	XSSFDrawing drawing = (XSSFDrawing) sheetStatistics.createDrawingPatriarch();
 	XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 2, 3, 4, 12);
@@ -252,6 +273,7 @@ public class ExcelGenerator {
 	    outputStream = new FileOutputStream(fileLocation);
 	    excel.write(outputStream);
 	    excel.close();
+	    outputStream.close();
 	} catch (IOException e) {
 	    throw new GenericException(
 		    "Ha habido un error no controlado al generar el excel: " + e.getLocalizedMessage());

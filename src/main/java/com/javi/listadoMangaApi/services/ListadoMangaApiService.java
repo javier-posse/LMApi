@@ -1,6 +1,7 @@
 package com.javi.listadoMangaApi.services;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import com.javi.listadoMangaApi.dto.CollectionDto;
 import com.javi.listadoMangaApi.dto.JpPublisherDto;
 import com.javi.listadoMangaApi.dto.MonthReleasesDto;
 import com.javi.listadoMangaApi.dto.SeriesDto;
+import com.javi.listadoMangaApi.dto.SeriesReleaseDto;
 import com.javi.listadoMangaApi.dto.SpPublisherDto;
 import com.javi.listadoMangaApi.exception.GenericException;
 import com.javi.listadoMangaApi.scrapers.AuthorScraper;
@@ -62,14 +64,22 @@ public class ListadoMangaApiService {
 
     public MonthReleasesDto searchYearReleases(int year, boolean generateExcel) throws GenericException {
 	MonthReleasesDto yearReleases = new MonthReleasesDto("Novedades " + year, new ArrayList<>());
+	int lastVolumeCount = 0;
 	for (int i = 1; i < 13; i++) {
+	    // Creo un list para contar la cantidad de últimos tomos y luego lo piso
+	    List<SeriesReleaseDto> seriesReleases = monthReleasesScraper.scrapMonthReleasesPage(i, year)
+		    .getSeriesReleases();
+
+	    // Uso el list anterior para filtrar en que importa de verdad
 	    yearReleases.getSeriesReleases()
-		    .addAll(monthReleasesScraper.scrapMonthReleasesPage(i, year).getSeriesReleases().stream()
+		    .addAll(seriesReleases.stream()
 			    .filter(seriesRelease -> seriesRelease.isFirstRelease() || seriesRelease.isOnlyVolume())
 			    .collect(Collectors.toList()));
+
+	    lastVolumeCount += seriesReleases.stream().filter(seriesRelease -> seriesRelease.isLastVolume()).count();
 	}
 	if (generateExcel) {
-	    ExcelGenerator.generateExcelReleases(year, yearReleases.getSeriesReleases());
+	    ExcelGenerator.generateExcelReleases(year, yearReleases.getSeriesReleases(), lastVolumeCount);
 	}
 
 	return yearReleases;

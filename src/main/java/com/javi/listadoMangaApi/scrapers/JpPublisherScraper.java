@@ -13,7 +13,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
-import com.javi.listadoMangaApi.commons.CommonScrapers;
+import com.javi.listadoMangaApi.commons.CommonUtils;
 import com.javi.listadoMangaApi.constants.UrlConstants;
 import com.javi.listadoMangaApi.dto.JpPublisherDto;
 import com.javi.listadoMangaApi.dto.SeriesSimplifiedDto;
@@ -59,7 +59,7 @@ public class JpPublisherScraper {
 			series = new ArrayList<>();
 		    }
 		} else {
-		    int seriesId = CommonScrapers.getLinkId(seriesElem.first());
+		    int seriesId = CommonUtils.getLinkId(seriesElem.first());
 		    String name = seriesElem.text();
 		    SeriesSimplifiedDto serie = new SeriesSimplifiedDto(seriesId, name);
 		    series.add(serie);

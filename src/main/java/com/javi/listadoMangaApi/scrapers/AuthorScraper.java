@@ -9,7 +9,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
-import com.javi.listadoMangaApi.commons.CommonScrapers;
+import com.javi.listadoMangaApi.commons.CommonUtils;
 import com.javi.listadoMangaApi.constants.UrlConstants;
 import com.javi.listadoMangaApi.dto.AuthorDto;
 import com.javi.listadoMangaApi.dto.SeriesSimplifiedDto;
@@ -35,7 +35,7 @@ public class AuthorScraper {
 	    bio = bio.length() > authorName.length() ? bio.substring(authorName.length() + 1, bio.length()) : "";
 
 	    // get series
-	    List<SeriesSimplifiedDto> series = CommonScrapers.getSeriesList(doc);
+	    List<SeriesSimplifiedDto> series = CommonUtils.getSeriesList(doc);
 
 	    author = new AuthorDto(id, authorName, bio, series);
 

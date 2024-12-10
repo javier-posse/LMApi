@@ -8,7 +8,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
 
-import com.javi.listadoMangaApi.commons.CommonScrapers;
+import com.javi.listadoMangaApi.commons.CommonUtils;
 import com.javi.listadoMangaApi.constants.UrlConstants;
 import com.javi.listadoMangaApi.dto.SeriesSimplifiedDto;
 import com.javi.listadoMangaApi.dto.SpPublisherDto;
@@ -31,7 +31,7 @@ public class SpPublisherScrapper {
 	    log.info(publisherName);
 
 	    // get series
-	    List<SeriesSimplifiedDto> series = CommonScrapers.getSeriesList(doc);
+	    List<SeriesSimplifiedDto> series = CommonUtils.getSeriesList(doc);
 
 	    spPublisherDto = new SpPublisherDto(id, publisherName, series);
 

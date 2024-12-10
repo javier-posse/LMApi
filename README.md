@@ -13,18 +13,23 @@ La subo con el beneplácito de Listado Manga.
 - Obtener información de una serie.
 - Obtener lanzamientos de un mes.
 - Obtener información de las novedades de un año.
+- Generar un excel con la información de novedades del año y algunas estadísticas.
 
 ## Tecnologías Utilizadas 
 - **Java Spring**: Framework principal del proyecto.
 - **Jsoup**: Librería para el web scraping.
 - **Lombok**: Librería de limpieza de código.
+- **Apache POI**: Librería para generación de ficheros office. Se usa para generar un excel.
 - **Maven**: Gestión de librerías.
 
 ## Licencia
 Para más detalles, consulta el archivo LICENSE.
 
 ## Uso
-Una vez ejecutado como se prefiera, se pueden encontrar las llamadas de postman en /src/main/resources/Postman_Collections
+Una vez ejecutado como se prefiera, se pueden encontrar las llamadas de postman en /src/main/resources/Postman_Collections.
+
+El excel generado se puede encontrar en /src/main/resources/Generated Excel.
+Por favor, tenga en cuenta que el código no tendrá ningún excel ya generado de ningún año. Si quiere uno, debe lanzar el endpoint de novedades de un año con el parámetro correspondiente.
 
 ## Errores conocidos
 La funcionalidad de la serie debe ser reescrita casi por completo.

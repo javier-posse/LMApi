@@ -3,11 +3,18 @@ package com.javi.listadoMangaApi.commons;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -16,23 +23,27 @@ import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DataValidationHelper;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.ss.util.RegionUtil;
+import org.apache.poi.xddf.usermodel.chart.AxisCrosses;
+import org.apache.poi.xddf.usermodel.chart.AxisPosition;
 import org.apache.poi.xddf.usermodel.chart.ChartTypes;
 import org.apache.poi.xddf.usermodel.chart.LegendPosition;
+import org.apache.poi.xddf.usermodel.chart.XDDFBarChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFCategoryAxis;
 import org.apache.poi.xddf.usermodel.chart.XDDFChartLegend;
 import org.apache.poi.xddf.usermodel.chart.XDDFDataSource;
 import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
 import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
 import org.apache.poi.xddf.usermodel.chart.XDDFPieChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFValueAxis;
 import org.apache.poi.xssf.usermodel.XSSFChart;
 import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper;
@@ -51,8 +62,8 @@ public class ExcelGenerator {
     public static String generateExcelReleases(int year, List<SeriesReleaseDto> seriesReleases, int lastVolumeCount)
 	    throws GenericException {
 
-	Workbook excel = new XSSFWorkbook();
-	Sheet sheetReleases = excel.createSheet("Lanzamientos");
+	XSSFWorkbook excel = new XSSFWorkbook();
+	XSSFSheet sheetReleases = excel.createSheet("Lanzamientos");
 	sheetReleases.setColumnWidth(0, 17000);
 	sheetReleases.setColumnWidth(1, 10000);
 	sheetReleases.setColumnWidth(2, 10000);
@@ -177,7 +188,7 @@ public class ExcelGenerator {
 	RegionUtil.setBorderRight(BorderStyle.THIN, regionBodyRight, sheetReleases);
 
 	// Generado hoja de estadisticas
-	Sheet sheetStatistics = excel.createSheet("Estadísticas");
+	XSSFSheet sheetStatistics = excel.createSheet("Estadísticas");
 	sheetStatistics.setColumnWidth(0, 15000);
 	sheetStatistics.setColumnWidth(1, 10000);
 	sheetStatistics.setColumnWidth(2, 10000);
@@ -247,26 +258,83 @@ public class ExcelGenerator {
 	Cell cellLastVolumeCount = row6.createCell(5);
 	cellLastVolumeCount.setCellValue(lastVolumeCount);
 
-	// Generacion de grafico editoriales
-	XSSFDrawing drawing = (XSSFDrawing) sheetStatistics.createDrawingPatriarch();
-	XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 2, 3, 4, 12);
-	XSSFChart chart = drawing.createChart(anchor);
-	chart.setTitleText("Distribución de Editoriales");
-	chart.setTitleOverlay(false);
-	XDDFChartLegend legend = chart.getOrAddLegend();
+	// Generación de gráfico editoriales
+	XSSFDrawing pieChartDrawing = (XSSFDrawing) sheetStatistics.createDrawingPatriarch();
+	XSSFClientAnchor anchorPie = pieChartDrawing.createAnchor(0, 0, 0, 0, 2, 3, 4, 12);
+	XSSFChart pieChart = pieChartDrawing.createChart(anchorPie);
+	pieChart.setTitleText("Distribución de Editoriales");
+	pieChart.setTitleOverlay(false);
+	XDDFChartLegend legend = pieChart.getOrAddLegend();
 	legend.setPosition(LegendPosition.RIGHT);
-	XDDFDataSource<String> categories = XDDFDataSourcesFactory.fromStringCellRange((XSSFSheet) sheetStatistics,
+
+	XDDFDataSource<String> categories = XDDFDataSourcesFactory.fromStringCellRange(sheetStatistics,
 		new CellRangeAddress(4, rowIndex - 1, 0, 0));
-	XDDFNumericalDataSource<Double> values = XDDFDataSourcesFactory
-		.fromNumericCellRange((XSSFSheet) sheetStatistics, new CellRangeAddress(4, rowIndex - 1, 1, 1));
-	XDDFPieChartData data = (XDDFPieChartData) chart.createData(ChartTypes.PIE, null, null);
+	XDDFNumericalDataSource<Double> values = XDDFDataSourcesFactory.fromNumericCellRange(sheetStatistics,
+		new CellRangeAddress(4, rowIndex - 1, 1, 1));
+	XDDFPieChartData data = (XDDFPieChartData) pieChart.createData(ChartTypes.PIE, null, null);
 	XDDFPieChartData.Series series = (XDDFPieChartData.Series) data.addSeries(categories, values);
 	series.setTitle("Editoriales", null);
-	chart.plot(data);
+	pieChart.plot(data);
+
+	// Generación de gráfico de meses
+
+	// genero un array de meses para crear un hashmap y así tenerlos ordenaicos
+	String[] mesesOrdenados = { "enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
+		"septiembre", "octubre", "noviembre", "diciembre" };
+	Map<String, Integer> novedadesPorMes = new LinkedHashMap<>();
+	for (String mes : mesesOrdenados) {
+	    novedadesPorMes.put(mes, 0);
+	}
+	// Contaje de repeticiones de mes
+	DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("MMMM", Locale.forLanguageTag("es-ES"));
+	for (Row rowi : sheetReleases) {
+	    Cell cell = rowi.getCell(1);
+	    if (cell != null && cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+		LocalDate date = cell.getLocalDateTimeCellValue().toLocalDate();
+		String month = date.format(monthFormatter);
+		novedadesPorMes.put(month, novedadesPorMes.get(month) + 1);
+	    }
+	}
+
+	XSSFDrawing monthChartDrawing = (XSSFDrawing) sheetStatistics.createDrawingPatriarch();
+	XSSFClientAnchor monthAnchor = monthChartDrawing.createAnchor(0, 0, 0, 0, 2, 15, 15, 30);
+	XSSFChart monthChart = monthChartDrawing.createChart(monthAnchor);
+	monthChart.setTitleText("Lanzamientos por meses");
+	monthChart.setTitleOverlay(false);
+	XDDFChartLegend monthLegend = monthChart.getOrAddLegend();
+	monthLegend.setPosition(LegendPosition.BOTTOM);
+
+	int newRowIndex = rowIndex + 1;
+	Row tempRow = sheetStatistics.createRow(newRowIndex++);
+	tempRow.createCell(0).setCellValue("Mes");
+	tempRow.createCell(1).setCellValue("Novedades");
+	for (Map.Entry<String, Integer> entry : novedadesPorMes.entrySet()) {
+	    tempRow = sheetStatistics.createRow(newRowIndex++);
+	    tempRow.createCell(0).setCellValue(StringUtils.capitalize(entry.getKey()));
+	    tempRow.createCell(1).setCellValue(entry.getValue());
+	}
+
+	XDDFCategoryAxis bottomAxis = monthChart.createCategoryAxis(AxisPosition.LEFT);
+	XDDFValueAxis leftAxis = monthChart.createValueAxis(AxisPosition.BOTTOM);
+	leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
+	int initialIndex = rowIndex + 2;
+
+	XDDFDataSource<String> meses = XDDFDataSourcesFactory.fromStringCellRange(sheetStatistics,
+		new CellRangeAddress(initialIndex, newRowIndex - 1, 0, 0));
+	XDDFNumericalDataSource<Double> novedades = XDDFDataSourcesFactory.fromNumericCellRange(sheetStatistics,
+		new CellRangeAddress(initialIndex, newRowIndex - 1, 1, 1));
+
+	XDDFBarChartData mothData = (XDDFBarChartData) monthChart.createData(ChartTypes.BAR, bottomAxis, leftAxis);
+	XDDFBarChartData.Series monthSeries = (XDDFBarChartData.Series) mothData.addSeries(meses, novedades);
+	monthSeries.setTitle("Novedades por Mes", null);
+	monthChart.plot(mothData);
+
 	// cierre y guardado del fichero
 	File currDir = new File("./src/main/resources/Generated Excel");
 	String path = currDir.getAbsolutePath();
-	String fileLocation = path + File.separator + year + "_releases.xlsx";
+	DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+	String fileLocation = path + File.separator + year + "_releases_"
+		+ Instant.now().atZone(ZoneId.of("Europe/Madrid")).format(dateFormat) + ".xlsx";
 
 	FileOutputStream outputStream;
 	try {

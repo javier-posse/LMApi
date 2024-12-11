@@ -54,7 +54,7 @@ public class CommonUtils {
 	    if (date.contains(",")) {
 		return LocalDate.parse(date, FULL_DATE_FORMATTER);
 	    } else {
-		return YearMonth.parse(date, YEAR_MONTH_FORMATTER).atDay(1);
+		return YearMonth.parse(date, YEAR_MONTH_FORMATTER).atEndOfMonth();
 	    }
 	} catch (DateTimeParseException e) {
 	    throw new GenericException("Error al convertir la fecha: " + e.getMessage());

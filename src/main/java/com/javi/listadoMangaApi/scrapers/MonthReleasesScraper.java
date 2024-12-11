@@ -25,7 +25,7 @@ public class MonthReleasesScraper {
 
     public MonthReleasesDto scrapMonthReleasesPage(int month, int year) throws GenericException {
 	String link = UrlConstants.BASE_URL + UrlConstants.CALENDAR_PATH + "?" + UrlConstants.MONTH_CALENDAR_PARAM + "="
-		+ month + "&" + UrlConstants.YEAR_CALENDAR_PARAM + "=";
+		+ month + "&" + UrlConstants.YEAR_CALENDAR_PARAM + "=" + year;
 	MonthReleasesDto monthReleases = null;
 
 	try {

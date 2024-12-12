@@ -1,7 +1,6 @@
 package com.javi.listadoMangaApi.scrapers;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.List;
 
 import org.jsoup.Jsoup;
@@ -35,8 +34,6 @@ public class SpPublisherScrapper {
 
 	    spPublisherDto = new SpPublisherDto(id, publisherName, series);
 
-	} catch (MalformedURLException exception) {
-	    throw new GenericException("Ha habido un error no controlado");
 	} catch (IOException exception) {
 	    throw new GenericException("Ha habido un error no controlado");
 	}

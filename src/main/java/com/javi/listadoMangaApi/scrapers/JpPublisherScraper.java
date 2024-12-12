@@ -1,11 +1,8 @@
 package com.javi.listadoMangaApi.scrapers;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -39,7 +36,7 @@ public class JpPublisherScraper {
 	    int nameEnd = publisherName.indexOf(" editadas");
 	    publisherName = publisherName.substring(15, nameEnd);
 	    Elements allSquares = doc.select("[class^=\"ventana_id\"]");
-	    List<SpPublisherDto> spPublishers = new ArrayList<SpPublisherDto>();
+	    List<SpPublisherDto> spPublishers = new ArrayList<>();
 	    String spPublisherName = null;
 	    boolean isFirst = true;
 	    List<SeriesSimplifiedDto> series = new ArrayList<>();
@@ -55,7 +52,6 @@ public class JpPublisherScraper {
 		    } else {
 			SpPublisherDto spPublisher = new SpPublisherDto(0, spPublisherName, series);
 			spPublishers.add(spPublisher);
-			spPublisher = null;
 			series = new ArrayList<>();
 		    }
 		} else {
@@ -63,25 +59,12 @@ public class JpPublisherScraper {
 		    String name = seriesElem.text();
 		    SeriesSimplifiedDto serie = new SeriesSimplifiedDto(seriesId, name);
 		    series.add(serie);
-		    spPublisherName = publisherName;
 		}
-		// logger.info(seriesElem.text());
 
 	    }
 	    // get series
-	    // List<SeriesSimplifiedDto> series = CommonScrapers.getSeriesList(doc);
-	    Map<String, SpPublisherDto> combos = new HashMap<>();
-//	    for (SpPublisherDto spPublisher : spPublishers) {
-//		combos.putIfAbsent(spPublisher.getName(),
-//			new SpPublisherDto(spPublisher.getId(), spPublisher.getName(), new ArrayList<>()));
-//		combos.get(spPublisher.getName()).getSeries().addAll(spPublisher.getSeries());
-//	    }
-//
-//	    List<SpPublisherDto> finalPublishersList = new ArrayList<>(combos.values());
 	    jpPublisherDto = new JpPublisherDto(id, publisherName, spPublishers);
 
-	} catch (MalformedURLException exception) {
-	    throw new GenericException("Ha habido un error no controlado");
 	} catch (IOException exception) {
 	    throw new GenericException("Ha habido un error no controlado");
 	}

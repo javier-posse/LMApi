@@ -1,7 +1,6 @@
 package com.javi.listadoMangaApi.scrapers;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,7 +70,7 @@ public class MonthReleasesScraper {
 				    releaseArtistName = children.get(i + c).text();
 				}
 			    }
-			    // recorro todo para pillar la fecha y cuando llego al elemento paro. Es lo
+			    // recorro para pillar la fecha y cuando llego al elemento paro. Es lo
 			    // unico que se me ha ocurrido
 			    Elements allElements = doc.getAllElements();
 			    for (Element element : allElements) {
@@ -94,6 +93,8 @@ public class MonthReleasesScraper {
 				case "NÚMERO ÚNICO":
 				    onlyVolume = true;
 				    break;
+				default:
+				    break;
 				}
 			    }
 			    SeriesReleaseDto seriesReleaseDto = new SeriesReleaseDto(releaseId, releaseName, date,
@@ -107,8 +108,6 @@ public class MonthReleasesScraper {
 	    });
 	    monthReleases = new MonthReleasesDto(monthName, seriesReleases);
 
-	} catch (MalformedURLException exception) {
-	    throw new GenericException("Ha habido un error no controlado");
 	} catch (IOException exception) {
 	    throw new GenericException("Ha habido un error no controlado");
 	}

@@ -1,7 +1,6 @@
 package com.javi.listadoMangaApi.scrapers;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.List;
 
 import org.jsoup.Jsoup;
@@ -23,7 +22,6 @@ public class CollectionScraper {
     public CollectionDto scrapCollectionPage(int id) throws GenericException {
 	String link = UrlConstants.BASE_URL + UrlConstants.PUBLISHER_COLLECTION + "?" + UrlConstants.ID_PARAM + "="
 		+ id;
-	// logger.info(link);
 	CollectionDto collectionDto = null;
 
 	try {
@@ -36,8 +34,6 @@ public class CollectionScraper {
 
 	    collectionDto = new CollectionDto(id, collectionName, series);
 
-	} catch (MalformedURLException exception) {
-	    throw new GenericException("Ha habido un error no controlado");
 	} catch (IOException exception) {
 	    throw new GenericException("Ha habido un error no controlado");
 	}

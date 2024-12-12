@@ -2,7 +2,6 @@ package com.javi.listadoMangaApi.services;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -71,10 +70,8 @@ public class ListadoMangaApiService {
 		    .getSeriesReleases();
 
 	    // Uso el list anterior para filtrar en que importa de verdad
-	    yearReleases.getSeriesReleases()
-		    .addAll(seriesReleases.stream()
-			    .filter(seriesRelease -> seriesRelease.isFirstRelease() || seriesRelease.isOnlyVolume())
-			    .collect(Collectors.toList()));
+	    yearReleases.getSeriesReleases().addAll(seriesReleases.stream()
+		    .filter(seriesRelease -> seriesRelease.isFirstRelease() || seriesRelease.isOnlyVolume()).toList());
 
 	    lastVolumeCount += seriesReleases.stream().filter(seriesRelease -> seriesRelease.isLastVolume()).count();
 	}

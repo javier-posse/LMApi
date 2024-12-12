@@ -1,7 +1,6 @@
 package com.javi.listadoMangaApi.scrapers;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,9 +44,6 @@ public class SeriesScraper {
 		idCollector.add(CommonUtils.getLinkId(data));
 		linkCollector.add(data.text());
 	    });
-
-	    // logger.info(dataCollector.toString());
-
 	    List<VolumeDto> volumes = new ArrayList<>();
 	    Elements volumesInfo = doc.getElementsByClass("cen");
 
@@ -56,9 +52,8 @@ public class SeriesScraper {
 		String volumePages = null;
 		String volumePrice = null;
 		String volumeDate = null;
-		String volumeSplit[] = volume.toString().split("<br>");
+		String[] volumeSplit = volume.toString().split("<br>");
 		if (volumeSplit.length > 2) {
-		    // logger.info(volumeSplit.length + "");
 		    for (int i = volumeSplit.length - 1; i > -1; i--) {
 			if (i == volumeSplit.length - 1) {
 			    volumeDate = volumeSplit[i].trim();
@@ -68,6 +63,7 @@ public class SeriesScraper {
 			    if (volumeSplit[i].contains("páginas")) {
 				volumePages = volumeSplit[i].trim();
 			    } else {
+
 				volumeName = volumeName + volumeSplit[i];
 			    }
 			} else {
@@ -93,7 +89,7 @@ public class SeriesScraper {
 		}
 
 		VolumeDto volumeFinal = new VolumeDto(
-			volumeName.trim().replaceAll("\\n", "").replaceAll(">", "").replaceAll("</a", ""), volumePages,
+			volumeName.trim().replace("\\n", "").replace(">", "").replace("</a", ""), volumePages,
 			volumePrice, volumeDate);
 		volumes.add(volumeFinal);
 	    });
@@ -131,8 +127,6 @@ public class SeriesScraper {
 
 	    }
 
-	} catch (MalformedURLException exception) {
-	    throw new GenericException("Ha habido un error no controlado");
 	} catch (IOException exception) {
 	    throw new GenericException("Ha habido un error no controlado");
 	}

@@ -11,9 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGlobalException(Exception ex, WebRequest request) {
-	String errorResponse = "{\"message\":\"" + ex.getMessage() + "\"}";
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<String> handleGlobalException(CustomException ex, WebRequest request) {
+	String errorResponse = "{\"message\":\"" + ex.getMessage() + "\", \"errorCode\":\"" + ex.getErrorCode() + "\"}";
 	return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

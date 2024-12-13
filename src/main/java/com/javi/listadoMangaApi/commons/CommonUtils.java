@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -14,7 +13,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.javi.listadoMangaApi.dto.SeriesSimplifiedDto;
-import com.javi.listadoMangaApi.exception.GenericException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,15 +47,11 @@ public class CommonUtils {
 	return Integer.parseInt(link.attr("href").split("=")[1]);
     }
 
-    public static LocalDate fullDateConverter(String date) throws GenericException {
-	try {
-	    if (date.contains(",")) {
-		return LocalDate.parse(date, FULL_DATE_FORMATTER);
-	    } else {
-		return YearMonth.parse(date, YEAR_MONTH_FORMATTER).atEndOfMonth();
-	    }
-	} catch (DateTimeParseException e) {
-	    throw new GenericException("Error al convertir la fecha: " + e.getMessage());
+    public static LocalDate fullDateConverter(String date) {
+	if (date.contains(",")) {
+	    return LocalDate.parse(date, FULL_DATE_FORMATTER);
+	} else {
+	    return YearMonth.parse(date, YEAR_MONTH_FORMATTER).atEndOfMonth();
 	}
     }
 

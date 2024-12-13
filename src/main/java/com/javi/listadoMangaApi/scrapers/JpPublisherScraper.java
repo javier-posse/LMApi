@@ -15,7 +15,6 @@ import com.javi.listadoMangaApi.constants.UrlConstants;
 import com.javi.listadoMangaApi.dto.JpPublisherDto;
 import com.javi.listadoMangaApi.dto.SeriesSimplifiedDto;
 import com.javi.listadoMangaApi.dto.SpPublisherDto;
-import com.javi.listadoMangaApi.exception.GenericException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,51 +22,46 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JpPublisherScraper {
 
-    public JpPublisherDto scrapJpPublisherPage(int id) throws GenericException {
+    public JpPublisherDto scrapJpPublisherPage(int id) throws IOException {
 	String link = UrlConstants.BASE_URL + UrlConstants.ORIGINAL_PUBLISHER_PATH + "?" + UrlConstants.ID_PARAM + "="
 		+ id;
 	JpPublisherDto jpPublisherDto = null;
 
-	try {
-	    // get publisher name
-	    Document doc = Jsoup.connect(link).timeout(10000).get();
-	    Elements allPublishers = doc.getElementsByClass("cen").select("h2");
-	    String publisherName = allPublishers.first().text();
-	    int nameEnd = publisherName.indexOf(" editadas");
-	    publisherName = publisherName.substring(15, nameEnd);
-	    Elements allSquares = doc.select("[class^=\"ventana_id\"]");
-	    List<SpPublisherDto> spPublishers = new ArrayList<>();
-	    String spPublisherName = null;
-	    boolean isFirst = true;
-	    List<SeriesSimplifiedDto> series = new ArrayList<>();
+	// get publisher name
+	Document doc = Jsoup.connect(link).timeout(10000).get();
+	Elements allPublishers = doc.getElementsByClass("cen").select("h2");
+	String publisherName = allPublishers.first().text();
+	int nameEnd = publisherName.indexOf(" editadas");
+	publisherName = publisherName.substring(15, nameEnd);
+	Elements allSquares = doc.select("[class^=\"ventana_id\"]");
+	List<SpPublisherDto> spPublishers = new ArrayList<>();
+	String spPublisherName = null;
+	boolean isFirst = true;
+	List<SeriesSimplifiedDto> series = new ArrayList<>();
 
-	    for (Element square : allSquares) {
-		Elements seriesElem = square.select("a");
-		if (seriesElem.isEmpty()) {
-		    int nameStart = square.text().indexOf("por ");
-		    spPublisherName = square.text().substring(nameStart + 4, square.text().length());
+	for (Element square : allSquares) {
+	    Elements seriesElem = square.select("a");
+	    if (seriesElem.isEmpty()) {
+		int nameStart = square.text().indexOf("por ");
+		spPublisherName = square.text().substring(nameStart + 4, square.text().length());
 
-		    if (isFirst) {
-			isFirst = false;
-		    } else {
-			SpPublisherDto spPublisher = new SpPublisherDto(0, spPublisherName, series);
-			spPublishers.add(spPublisher);
-			series = new ArrayList<>();
-		    }
+		if (isFirst) {
+		    isFirst = false;
 		} else {
-		    int seriesId = CommonUtils.getLinkId(seriesElem.first());
-		    String name = seriesElem.text();
-		    SeriesSimplifiedDto serie = new SeriesSimplifiedDto(seriesId, name);
-		    series.add(serie);
+		    SpPublisherDto spPublisher = new SpPublisherDto(0, spPublisherName, series);
+		    spPublishers.add(spPublisher);
+		    series = new ArrayList<>();
 		}
-
+	    } else {
+		int seriesId = CommonUtils.getLinkId(seriesElem.first());
+		String name = seriesElem.text();
+		SeriesSimplifiedDto serie = new SeriesSimplifiedDto(seriesId, name);
+		series.add(serie);
 	    }
-	    // get series
-	    jpPublisherDto = new JpPublisherDto(id, publisherName, spPublishers);
 
-	} catch (IOException exception) {
-	    throw new GenericException("Ha habido un error no controlado");
 	}
+	// get series
+	jpPublisherDto = new JpPublisherDto(id, publisherName, spPublishers);
 
 	return jpPublisherDto;
     }

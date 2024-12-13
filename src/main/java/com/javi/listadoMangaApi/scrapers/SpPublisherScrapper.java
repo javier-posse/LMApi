@@ -11,7 +11,6 @@ import com.javi.listadoMangaApi.commons.CommonUtils;
 import com.javi.listadoMangaApi.constants.UrlConstants;
 import com.javi.listadoMangaApi.dto.SeriesSimplifiedDto;
 import com.javi.listadoMangaApi.dto.SpPublisherDto;
-import com.javi.listadoMangaApi.exception.GenericException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,24 +18,19 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SpPublisherScrapper {
 
-    public SpPublisherDto scrapSpPublisherPage(int id) throws GenericException {
+    public SpPublisherDto scrapSpPublisherPage(int id) throws IOException {
 	String link = UrlConstants.BASE_URL + UrlConstants.PUBLISHER_PATH + "?" + UrlConstants.ID_PARAM + "=" + id;
 	SpPublisherDto spPublisherDto = null;
 
-	try {
-	    // get publisher name
-	    Document doc = Jsoup.connect(link).get();
-	    String publisherName = doc.getElementsByClass("cen").select("h2").first().text();
-	    log.info(publisherName);
+	// get publisher name
+	Document doc = Jsoup.connect(link).get();
+	String publisherName = doc.getElementsByClass("cen").select("h2").first().text();
+	log.info(publisherName);
 
-	    // get series
-	    List<SeriesSimplifiedDto> series = CommonUtils.getSeriesList(doc);
+	// get series
+	List<SeriesSimplifiedDto> series = CommonUtils.getSeriesList(doc);
 
-	    spPublisherDto = new SpPublisherDto(id, publisherName, series);
-
-	} catch (IOException exception) {
-	    throw new GenericException("Ha habido un error no controlado");
-	}
+	spPublisherDto = new SpPublisherDto(id, publisherName, series);
 
 	return spPublisherDto;
     }

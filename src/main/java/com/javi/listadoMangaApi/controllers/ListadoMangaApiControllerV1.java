@@ -41,7 +41,7 @@ public class ListadoMangaApiControllerV1 {
     }
 
     @GetMapping("/series/{id}")
-    public SeriesDto getSeriesInfo(@PathVariable int id) throws GenericException {
+    public SeriesDto getSeriesInfo(@PathVariable int id) throws Exception {
 	return apiService.searchSeriesById(id);
     }
 

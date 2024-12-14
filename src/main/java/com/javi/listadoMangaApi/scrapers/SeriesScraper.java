@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SeriesScraper {
 
     public SeriesDto scrapSeriesPage(int id) throws IOException, IndexOutOfBoundsException {
-	String link = UrlConstants.BASE_URL + UrlConstants.SERIES_PATH + "x?" + UrlConstants.ID_PARAM + "=" + id;
+	String link = UrlConstants.BASE_URL + UrlConstants.SERIES_PATH + "?" + UrlConstants.ID_PARAM + "=" + id;
 	SeriesDto seriesDto = null;
 
 	Document doc = Jsoup.connect(link).get();

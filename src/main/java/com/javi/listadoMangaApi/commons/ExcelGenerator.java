@@ -53,7 +53,6 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.javi.listadoMangaApi.dto.SeriesReleaseDto;
-import com.javi.listadoMangaApi.exception.GenericException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -64,7 +63,7 @@ public class ExcelGenerator {
     }
 
     public static String generateExcelReleases(int year, List<SeriesReleaseDto> seriesReleases, int lastVolumeCount)
-	    throws GenericException, IOException {
+	    throws IOException {
 
 	// Genero lo necesario para guardar el fichero
 	File currDir = new File("./src/main/resources/Generated Excel");
@@ -74,6 +73,23 @@ public class ExcelGenerator {
 		+ Instant.now().atZone(ZoneId.of("Europe/Madrid")).format(dateFormat) + ".xlsx";
 
 	XSSFWorkbook excel = new XSSFWorkbook();
+	int[] contMangaMania = { 0 };
+	CellStyle headerStyle = createHeaderStyle(excel);
+	XSSFSheet sheetReleases = generateFirstSheet(excel, contMangaMania, seriesReleases, headerStyle);
+	generateSecondSheet(excel, contMangaMania, seriesReleases, headerStyle, sheetReleases, lastVolumeCount);
+
+	// cierre y guardado del fichero
+	FileOutputStream outputStream;
+	outputStream = new FileOutputStream(fileLocation);
+	excel.write(outputStream);
+	excel.close();
+	outputStream.close();
+
+	return fileLocation;
+    }
+
+    private static XSSFSheet generateFirstSheet(XSSFWorkbook excel, int[] contMangaMania,
+	    List<SeriesReleaseDto> seriesReleases, CellStyle headerStyle) {
 	XSSFSheet sheetReleases = excel.createSheet("Lanzamientos");
 	sheetReleases.setColumnWidth(0, 17000);
 	sheetReleases.setColumnWidth(1, 10000);
@@ -82,22 +98,6 @@ public class ExcelGenerator {
 
 	// Headers de la tabla y sus estilo
 	Row header = sheetReleases.createRow(0);
-
-	CellStyle headerStyle = excel.createCellStyle();
-	headerStyle.setFillForegroundColor(IndexedColors.AQUA.getIndex());
-	headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-	XSSFFont font = (excel).createFont();
-	font.setFontName("Arial");
-	font.setFontHeightInPoints((short) 16);
-	font.setBold(true);
-	headerStyle.setFont(font);
-	headerStyle.setAlignment(HorizontalAlignment.CENTER);
-	headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-	headerStyle.setBorderBottom(BorderStyle.THICK);
-	headerStyle.setBorderTop(BorderStyle.THICK);
-	headerStyle.setBorderLeft(BorderStyle.THICK);
-	headerStyle.setBorderRight(BorderStyle.THICK);
 
 	Cell headerCell = header.createCell(0);
 	headerCell.setCellValue("Nombre");
@@ -151,6 +151,10 @@ public class ExcelGenerator {
 
 	    Cell cell = row.createCell(0);
 	    cell.setCellValue(seriesReleases.get(i).getName());
+	    if (seriesReleases.get(i).getName().contains("Manía")
+		    && seriesReleases.get(i).getPublisherName().equals("Planeta Cómic")) {
+		contMangaMania[0]++;
+	    }
 	    cell.setCellStyle(style);
 
 	    cell = row.createCell(1);
@@ -198,6 +202,12 @@ public class ExcelGenerator {
 	RegionUtil.setBorderLeft(BorderStyle.THIN, regionBodyRight, sheetReleases);
 	RegionUtil.setBorderRight(BorderStyle.THIN, regionBodyRight, sheetReleases);
 
+	return sheetReleases;
+    }
+
+    private static XSSFSheet generateSecondSheet(XSSFWorkbook excel, int[] contMangaMania,
+	    List<SeriesReleaseDto> seriesReleases, CellStyle headerStyle, XSSFSheet sheetReleases,
+	    int lastVolumeCount) {
 	// Generado hoja de estadisticas
 	XSSFSheet sheetStatistics = excel.createSheet("Estadísticas");
 	sheetStatistics.setColumnWidth(0, 15000);
@@ -269,6 +279,20 @@ public class ExcelGenerator {
 	Cell cellLastVolumeCount = row6.createCell(5);
 	cellLastVolumeCount.setCellValue(lastVolumeCount);
 
+	Row row8 = sheetStatistics.getRow(8);
+	Cell cellMangaManiaLabel = row8.createCell(4);
+	cellMangaManiaLabel.setCellValue("Total \"Manga Manía\": ");
+	cellMangaManiaLabel.setCellStyle(headerStyle);
+	Cell celllMangaManiaCount = row8.createCell(5);
+	celllMangaManiaCount.setCellValue(contMangaMania[0]);
+
+	createCharts(sheetStatistics, rowIndex, sheetReleases);
+
+	return sheetStatistics;
+
+    }
+
+    public static void createCharts(XSSFSheet sheetStatistics, int rowIndex, XSSFSheet sheetReleases) {
 	// Generación de gráfico editoriales
 	XSSFDrawing pieChartDrawing = sheetStatistics.createDrawingPatriarch();
 	XSSFClientAnchor anchorPie = pieChartDrawing.createAnchor(0, 0, 0, 0, 2, 3, 4, 12);
@@ -339,13 +363,25 @@ public class ExcelGenerator {
 	XDDFBarChartData.Series monthSeries = (XDDFBarChartData.Series) mothData.addSeries(meses, novedades);
 	monthSeries.setTitle("Novedades por Mes", null);
 	monthChart.plot(mothData);
+    }
 
-	// cierre y guardado del fichero
-	FileOutputStream outputStream;
-	outputStream = new FileOutputStream(fileLocation);
-	excel.write(outputStream);
-	outputStream.close();
+    private static CellStyle createHeaderStyle(XSSFWorkbook excel) {
+	CellStyle headerStyle = excel.createCellStyle();
+	headerStyle.setFillForegroundColor(IndexedColors.AQUA.getIndex());
+	headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
-	return fileLocation;
+	XSSFFont font = (excel).createFont();
+	font.setFontName("Arial");
+	font.setFontHeightInPoints((short) 16);
+	font.setBold(true);
+	headerStyle.setFont(font);
+	headerStyle.setAlignment(HorizontalAlignment.CENTER);
+	headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+	headerStyle.setBorderBottom(BorderStyle.THICK);
+	headerStyle.setBorderTop(BorderStyle.THICK);
+	headerStyle.setBorderLeft(BorderStyle.THICK);
+	headerStyle.setBorderRight(BorderStyle.THICK);
+
+	return headerStyle;
     }
 }

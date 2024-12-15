@@ -73,10 +73,12 @@ public class ExcelGenerator {
 		+ Instant.now().atZone(ZoneId.of("Europe/Madrid")).format(dateFormat) + ".xlsx";
 
 	XSSFWorkbook excel = new XSSFWorkbook();
-	int[] contMangaMania = { 0 };
+	int[] conts = { 0, 0, 0 };
 	CellStyle headerStyle = createHeaderStyle(excel);
-	XSSFSheet sheetReleases = generateFirstSheet(excel, contMangaMania, seriesReleases, headerStyle);
-	generateSecondSheet(excel, contMangaMania, seriesReleases, headerStyle, sheetReleases, lastVolumeCount);
+	XSSFSheet sheetReleases = generateFirstSheet(excel, conts, seriesReleases, headerStyle);
+	XSSFSheet sheetStatistics = generateSecondSheet(excel, conts, seriesReleases, headerStyle, sheetReleases,
+		lastVolumeCount);
+	generateThirdSheet(excel, sheetStatistics, conts);
 
 	// cierre y guardado del fichero
 	FileOutputStream outputStream;
@@ -205,9 +207,8 @@ public class ExcelGenerator {
 	return sheetReleases;
     }
 
-    private static XSSFSheet generateSecondSheet(XSSFWorkbook excel, int[] contMangaMania,
-	    List<SeriesReleaseDto> seriesReleases, CellStyle headerStyle, XSSFSheet sheetReleases,
-	    int lastVolumeCount) {
+    private static XSSFSheet generateSecondSheet(XSSFWorkbook excel, int[] conts, List<SeriesReleaseDto> seriesReleases,
+	    CellStyle headerStyle, XSSFSheet sheetReleases, int lastVolumeCount) {
 	// Generado hoja de estadisticas
 	XSSFSheet sheetStatistics = excel.createSheet("Estadísticas");
 	sheetStatistics.setColumnWidth(0, 15000);
@@ -216,14 +217,6 @@ public class ExcelGenerator {
 	sheetStatistics.setColumnWidth(3, 10000);
 	sheetStatistics.setColumnWidth(4, 10000);
 	sheetStatistics.setColumnWidth(5, 10000);
-
-	// total de lanzamientos
-	Row row = sheetStatistics.createRow(1);
-	Cell cellReleasesLabel = row.createCell(0);
-	cellReleasesLabel.setCellValue("Total lanzamientos: ");
-	cellReleasesLabel.setCellStyle(headerStyle);
-	Cell cellReleasesCount = row.createCell(1);
-	cellReleasesCount.setCellValue(seriesReleases.size());
 
 	// tabla de editoriales
 	// Contar las apariciones de cada editorial en el primer sheet
@@ -239,13 +232,12 @@ public class ExcelGenerator {
 	List<Map.Entry<String, Integer>> sortedEditorialCounts = new ArrayList<>(publisherCounts.entrySet());
 	sortedEditorialCounts.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()));
 	// Colocar en el sheet las editoriales
-	int rowIndex = 3;
-	Row headerRow = sheetStatistics.createRow(rowIndex++);
+	Row headerRow = sheetStatistics.createRow(conts[1]++);
 	headerRow.createCell(0).setCellValue("Nombre editorial");
 	headerRow.createCell(1).setCellValue("Cantidad de lanzamientos");
 
 	for (Map.Entry<String, Integer> entry : sortedEditorialCounts) {
-	    Row rowPublishersTable = sheetStatistics.createRow(rowIndex++);
+	    Row rowPublishersTable = sheetStatistics.createRow(conts[1]++);
 	    rowPublishersTable.createCell(0).setCellValue(entry.getKey());
 	    rowPublishersTable.createCell(1).setCellValue(entry.getValue());
 	}
@@ -260,42 +252,68 @@ public class ExcelGenerator {
 		firstVolumeCont++;
 	    }
 	}
-	Cell cellOnlyVolumeLabel = row.createCell(2);
+	// total de lanzamientos
+	Row row = sheetStatistics.getRow(1);
+	Cell cellReleasesLabel = row.createCell(3);
+	cellReleasesLabel.setCellValue("Total lanzamientos: ");
+	cellReleasesLabel.setCellStyle(headerStyle);
+	Cell cellReleasesCount = row.createCell(4);
+	cellReleasesCount.setCellValue(seriesReleases.size());
+
+	// Total de tomos únicos
+	Row row4 = sheetStatistics.getRow(4);
+	Cell cellOnlyVolumeLabel = row4.createCell(3);
 	cellOnlyVolumeLabel.setCellValue("Total tomos únicos: ");
 	cellOnlyVolumeLabel.setCellStyle(headerStyle);
-	Cell cellOnlyVolumeCount = row.createCell(3);
+	Cell cellOnlyVolumeCount = row4.createCell(4);
 	cellOnlyVolumeCount.setCellValue(onlyVolumeCont);
 
-	Cell cellFirstVolumeLabel = row.createCell(4);
+	// Total de primeros tomos
+	Row row7 = sheetStatistics.getRow(7);
+	Cell cellFirstVolumeLabel = row7.createCell(3);
 	cellFirstVolumeLabel.setCellValue("Total nuevas series: ");
 	cellFirstVolumeLabel.setCellStyle(headerStyle);
-	Cell cellFirstVolumeCount = row.createCell(5);
+	Cell cellFirstVolumeCount = row7.createCell(4);
 	cellFirstVolumeCount.setCellValue(firstVolumeCont);
 
-	Row row6 = sheetStatistics.getRow(6);
-	Cell cellLastVolumeLabel = row6.createCell(4);
+	// Total de terminadas
+	Row row10 = sheetStatistics.getRow(10);
+	Cell cellLastVolumeLabel = row10.createCell(3);
 	cellLastVolumeLabel.setCellValue("Total series terminadas: ");
 	cellLastVolumeLabel.setCellStyle(headerStyle);
-	Cell cellLastVolumeCount = row6.createCell(5);
+	Cell cellLastVolumeCount = row10.createCell(4);
 	cellLastVolumeCount.setCellValue(lastVolumeCount);
 
-	Row row8 = sheetStatistics.getRow(8);
-	Cell cellMangaManiaLabel = row8.createCell(4);
+	// Total de manga manía
+	Row row13 = sheetStatistics.getRow(13);
+	Cell cellMangaManiaLabel = row13.createCell(3);
 	cellMangaManiaLabel.setCellValue("Total \"Manga Manía\": ");
 	cellMangaManiaLabel.setCellStyle(headerStyle);
-	Cell celllMangaManiaCount = row8.createCell(5);
-	celllMangaManiaCount.setCellValue(contMangaMania[0]);
+	Cell celllMangaManiaCount = row13.createCell(4);
+	celllMangaManiaCount.setCellValue(conts[0]);
 
-	createCharts(sheetStatistics, rowIndex, sheetReleases);
+	createMonthTable(conts, sheetReleases, sheetStatistics);
 
 	return sheetStatistics;
 
     }
 
-    public static void createCharts(XSSFSheet sheetStatistics, int rowIndex, XSSFSheet sheetReleases) {
+    private static XSSFSheet generateThirdSheet(XSSFWorkbook excel, XSSFSheet sheetStatistics, int[] conts) {
+	XSSFSheet sheetCharts = excel.createSheet("Gráficas");
+	createCharts(sheetStatistics, sheetCharts, conts);
+	return sheetCharts;
+    }
+
+    private static void createCharts(XSSFSheet sheetStatistics, XSSFSheet sheetCharts, int[] conts) {
+	createPublisherChart(sheetStatistics, sheetCharts, conts);
+	createMonthChart(sheetStatistics, sheetCharts, conts);
+
+    }
+
+    private static void createPublisherChart(XSSFSheet sheetStatistics, XSSFSheet sheetCharts, int[] conts) {
 	// Generación de gráfico editoriales
-	XSSFDrawing pieChartDrawing = sheetStatistics.createDrawingPatriarch();
-	XSSFClientAnchor anchorPie = pieChartDrawing.createAnchor(0, 0, 0, 0, 2, 3, 4, 12);
+	XSSFDrawing pieChartDrawing = sheetCharts.createDrawingPatriarch();
+	XSSFClientAnchor anchorPie = pieChartDrawing.createAnchor(0, 0, 0, 0, 0, 2, 8, 14);
 	XSSFChart pieChart = pieChartDrawing.createChart(anchorPie);
 	pieChart.setTitleText("Distribución de Editoriales");
 	pieChart.setTitleOverlay(false);
@@ -303,16 +321,16 @@ public class ExcelGenerator {
 	legend.setPosition(LegendPosition.RIGHT);
 
 	XDDFDataSource<String> categories = XDDFDataSourcesFactory.fromStringCellRange(sheetStatistics,
-		new CellRangeAddress(4, rowIndex - 1, 0, 0));
+		new CellRangeAddress(4, conts[1] - 1, 0, 0));
 	XDDFNumericalDataSource<Double> values = XDDFDataSourcesFactory.fromNumericCellRange(sheetStatistics,
-		new CellRangeAddress(4, rowIndex - 1, 1, 1));
+		new CellRangeAddress(4, conts[1] - 1, 1, 1));
 	XDDFPieChartData data = (XDDFPieChartData) pieChart.createData(ChartTypes.PIE, null, null);
 	XDDFPieChartData.Series series = (XDDFPieChartData.Series) data.addSeries(categories, values);
 	series.setTitle("Editoriales", null);
 	pieChart.plot(data);
+    }
 
-	// Generación de gráfico de meses
-
+    private static void createMonthTable(int[] conts, XSSFSheet sheetReleases, XSSFSheet sheetStatistics) {
 	// genero un array de meses para crear un hashmap y así tenerlos ordenaicos
 	String[] mesesOrdenados = { "enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
 		"septiembre", "octubre", "noviembre", "diciembre" };
@@ -331,33 +349,36 @@ public class ExcelGenerator {
 	    }
 	}
 
-	XSSFDrawing monthChartDrawing = sheetStatistics.createDrawingPatriarch();
-	XSSFClientAnchor monthAnchor = monthChartDrawing.createAnchor(0, 0, 0, 0, 2, 15, 15, 30);
+	conts[2] = conts[1] + 1;
+	Row tempRow = sheetStatistics.createRow(conts[2]++);
+	tempRow.createCell(0).setCellValue("Mes");
+	tempRow.createCell(1).setCellValue("Novedades");
+	for (Map.Entry<String, Integer> entry : novedadesPorMes.entrySet()) {
+	    tempRow = sheetStatistics.createRow(conts[2]++);
+	    tempRow.createCell(0).setCellValue(StringUtils.capitalize(entry.getKey()));
+	    tempRow.createCell(1).setCellValue(entry.getValue());
+	}
+    }
+
+    private static void createMonthChart(XSSFSheet sheetStatistics, XSSFSheet sheetCharts, int[] conts) {
+
+	XSSFDrawing monthChartDrawing = sheetCharts.createDrawingPatriarch();
+	XSSFClientAnchor monthAnchor = monthChartDrawing.createAnchor(0, 0, 0, 0, 0, 17, 15, 35);
 	XSSFChart monthChart = monthChartDrawing.createChart(monthAnchor);
 	monthChart.setTitleText("Lanzamientos por meses");
 	monthChart.setTitleOverlay(false);
 	XDDFChartLegend monthLegend = monthChart.getOrAddLegend();
 	monthLegend.setPosition(LegendPosition.BOTTOM);
 
-	int newRowIndex = rowIndex + 1;
-	Row tempRow = sheetStatistics.createRow(newRowIndex++);
-	tempRow.createCell(0).setCellValue("Mes");
-	tempRow.createCell(1).setCellValue("Novedades");
-	for (Map.Entry<String, Integer> entry : novedadesPorMes.entrySet()) {
-	    tempRow = sheetStatistics.createRow(newRowIndex++);
-	    tempRow.createCell(0).setCellValue(StringUtils.capitalize(entry.getKey()));
-	    tempRow.createCell(1).setCellValue(entry.getValue());
-	}
-
 	XDDFCategoryAxis bottomAxis = monthChart.createCategoryAxis(AxisPosition.LEFT);
 	XDDFValueAxis leftAxis = monthChart.createValueAxis(AxisPosition.BOTTOM);
 	leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
-	int initialIndex = rowIndex + 2;
+	int initialIndex = conts[1] + 2;
 
 	XDDFDataSource<String> meses = XDDFDataSourcesFactory.fromStringCellRange(sheetStatistics,
-		new CellRangeAddress(initialIndex, newRowIndex - 1, 0, 0));
+		new CellRangeAddress(initialIndex, conts[2] - 1, 0, 0));
 	XDDFNumericalDataSource<Double> novedades = XDDFDataSourcesFactory.fromNumericCellRange(sheetStatistics,
-		new CellRangeAddress(initialIndex, newRowIndex - 1, 1, 1));
+		new CellRangeAddress(initialIndex, conts[2] - 1, 1, 1));
 
 	XDDFBarChartData mothData = (XDDFBarChartData) monthChart.createData(ChartTypes.BAR, bottomAxis, leftAxis);
 	XDDFBarChartData.Series monthSeries = (XDDFBarChartData.Series) mothData.addSeries(meses, novedades);

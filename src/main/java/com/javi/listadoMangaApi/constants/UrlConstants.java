@@ -1,6 +1,9 @@
 package com.javi.listadoMangaApi.constants;
 
 public class UrlConstants {
+    private UrlConstants() {
+
+    }
 
     /*
      * URL BASE

@@ -1,6 +1,5 @@
 package com.javi.listadoMangaApi.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,8 +16,11 @@ import com.javi.listadoMangaApi.services.ListadoMangaApiService;
 
 @RestController
 public class ListadoMangaApiControllerV1 {
-    @Autowired
     ListadoMangaApiService apiService;
+
+    public ListadoMangaApiControllerV1(ListadoMangaApiService apiService) {
+	this.apiService = apiService;
+    }
 
     @GetMapping("/author/{id}")
     public AuthorDto getAuthorInfo(@PathVariable int id) throws GenericException {

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.javi.listadoMangaApi.commons.ExcelGenerator;
@@ -26,20 +25,26 @@ import com.javi.listadoMangaApi.scrapers.SpPublisherScrapper;
 
 @Service
 public class ListadoMangaApiService {
-    @Autowired
+
     AuthorScraper authorScraper;
-    @Autowired
     CollectionScraper collectionScraper;
-    @Autowired
     SpPublisherScrapper publisherScrapper;
-    @Autowired
     JpPublisherScraper jpPublisherScraper;
-    @Autowired
     SeriesScraper seriesScraper;
-    @Autowired
     MonthReleasesScraper monthReleasesScraper;
-    @Autowired
     ExceptionFactory exceptionFactory;
+
+    public ListadoMangaApiService(AuthorScraper authorScraper, CollectionScraper collectionScraper,
+	    SpPublisherScrapper publisherScrapper, JpPublisherScraper jpPublisherScraper, SeriesScraper seriesScraper,
+	    MonthReleasesScraper monthReleasesScraper, ExceptionFactory exceptionFactory) {
+	this.authorScraper = authorScraper;
+	this.collectionScraper = collectionScraper;
+	this.publisherScrapper = publisherScrapper;
+	this.jpPublisherScraper = jpPublisherScraper;
+	this.seriesScraper = seriesScraper;
+	this.monthReleasesScraper = monthReleasesScraper;
+	this.exceptionFactory = exceptionFactory;
+    }
 
     public AuthorDto searchAuthorById(int id) throws GenericException {
 	try {
@@ -105,7 +110,7 @@ public class ListadoMangaApiService {
 	    yearReleases.getSeriesReleases().addAll(seriesReleases.stream()
 		    .filter(seriesRelease -> seriesRelease.isFirstRelease() || seriesRelease.isOnlyVolume()).toList());
 
-	    lastVolumeCount += seriesReleases.stream().filter(seriesRelease -> seriesRelease.isLastVolume()).count();
+	    lastVolumeCount += seriesReleases.stream().filter(SeriesReleaseDto::isLastVolume).count();
 	}
 	if (generateExcel) {
 	    try {

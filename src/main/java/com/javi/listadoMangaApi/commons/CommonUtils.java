@@ -19,6 +19,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CommonUtils {
 
+    private CommonUtils() {
+
+    }
+
     private static final DateTimeFormatter FULL_DATE_FORMATTER = new DateTimeFormatterBuilder().parseCaseInsensitive()
 	    .appendPattern("EEEE, d MMMM yyyy").toFormatter(Locale.forLanguageTag("es-ES"));
 

@@ -66,7 +66,7 @@ public class ExcelGenerator {
 	    throws IOException {
 
 	// Genero lo necesario para guardar el fichero
-	File currDir = new File("./src/main/resources/Generated Excel");
+	File currDir = new File("./");
 	String path = currDir.getAbsolutePath();
 	DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 	String fileLocation = path + File.separator + year + "_releases_"

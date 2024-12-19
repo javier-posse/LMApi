@@ -13,6 +13,7 @@ import com.javi.listadoMangaApi.commons.CommonUtils;
 import com.javi.listadoMangaApi.constants.UrlConstants;
 import com.javi.listadoMangaApi.dto.SeriesDto;
 import com.javi.listadoMangaApi.dto.VolumeDto;
+import com.javi.listadoMangaApi.exception.GenericException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SeriesScraper {
 
-    public SeriesDto scrapSeriesPage(int id) throws IOException, IndexOutOfBoundsException {
+    public SeriesDto scrapSeriesPage(int id) throws GenericException, IOException {
 	String link = UrlConstants.BASE_URL + UrlConstants.SERIES_PATH + "?" + UrlConstants.ID_PARAM + "=" + id;
 	SeriesDto seriesDto = null;
 

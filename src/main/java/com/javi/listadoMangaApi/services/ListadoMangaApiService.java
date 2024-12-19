@@ -78,7 +78,7 @@ public class ListadoMangaApiService {
 	}
     }
 
-    public SeriesDto searchSeriesById(int id) throws Exception {
+    public SeriesDto searchSeriesById(int id) throws GenericException {
 	try {
 	    return seriesScraper.scrapSeriesPage(id);
 	} catch (Exception e) {

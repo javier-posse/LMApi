@@ -66,7 +66,7 @@ public class ExcelGenerator {
 	    throws IOException {
 
 	// Genero lo necesario para guardar el fichero
-	File currDir = new File("./");
+	File currDir = new File("./Excel");
 	String path = currDir.getAbsolutePath();
 	DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 	String fileLocation = path + File.separator + year + "_releases_"
@@ -75,7 +75,8 @@ public class ExcelGenerator {
 	XSSFWorkbook excel = new XSSFWorkbook();
 	int[] conts = { 0, 0, 0 };
 	CellStyle headerStyle = createHeaderStyle(excel);
-	XSSFSheet sheetReleases = generateFirstSheet(excel, conts, seriesReleases, headerStyle);
+	CellStyle tableBodyStyle = createTableBodyStyle(excel);
+	XSSFSheet sheetReleases = generateFirstSheet(excel, conts, seriesReleases, headerStyle, tableBodyStyle);
 	XSSFSheet sheetStatistics = generateSecondSheet(excel, conts, seriesReleases, headerStyle, sheetReleases,
 		lastVolumeCount);
 	generateThirdSheet(excel, sheetStatistics, conts);
@@ -91,7 +92,7 @@ public class ExcelGenerator {
     }
 
     private static XSSFSheet generateFirstSheet(XSSFWorkbook excel, int[] contMangaMania,
-	    List<SeriesReleaseDto> seriesReleases, CellStyle headerStyle) {
+	    List<SeriesReleaseDto> seriesReleases, CellStyle headerStyle, CellStyle tableBodyStyle) {
 	XSSFSheet sheetReleases = excel.createSheet("Lanzamientos");
 	sheetReleases.setColumnWidth(0, 17000);
 	sheetReleases.setColumnWidth(1, 10000);
@@ -117,20 +118,11 @@ public class ExcelGenerator {
 	headerCell.setCellValue("Tipo");
 	headerCell.setCellStyle(headerStyle);
 
-	// lineas de series
-	CellStyle style = excel.createCellStyle();
-	style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-	style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-	style.setWrapText(true);
-	style.setAlignment(HorizontalAlignment.CENTER);
-	style.setVerticalAlignment(VerticalAlignment.CENTER);
-	style.setBorderBottom(BorderStyle.THIN);
-
 	// lineas de fechas
 	CellStyle cellStyleDate = excel.createCellStyle();
 	CreationHelper createHelper = excel.getCreationHelper();
 	cellStyleDate.setDataFormat(createHelper.createDataFormat().getFormat("dd MMMM yyyy"));
-	cellStyleDate.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+	cellStyleDate.setFillForegroundColor(IndexedColors.SEA_GREEN.getIndex());
 	cellStyleDate.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 	cellStyleDate.setWrapText(true);
 	cellStyleDate.setAlignment(HorizontalAlignment.CENTER);
@@ -157,7 +149,7 @@ public class ExcelGenerator {
 		    && seriesReleases.get(i).getPublisherName().equals("Planeta Cómic")) {
 		contMangaMania[0]++;
 	    }
-	    cell.setCellStyle(style);
+	    cell.setCellStyle(tableBodyStyle);
 
 	    cell = row.createCell(1);
 	    // Convierto la fecha a formato fecha de Java
@@ -167,7 +159,7 @@ public class ExcelGenerator {
 
 	    cell = row.createCell(2);
 	    cell.setCellValue(seriesReleases.get(i).getPublisherName());
-	    cell.setCellStyle(style);
+	    cell.setCellStyle(tableBodyStyle);
 
 	    cell = row.createCell(3);
 	    if (seriesReleases.get(i).isOnlyVolume()) {
@@ -177,7 +169,7 @@ public class ExcelGenerator {
 	    } else if (seriesReleases.get(i).isLastVolume()) {
 		cell.setCellValue(options[2]);
 	    }
-	    cell.setCellStyle(style);
+	    cell.setCellStyle(tableBodyStyle);
 	}
 
 	// crear tabla para bordes
@@ -404,5 +396,18 @@ public class ExcelGenerator {
 	headerStyle.setBorderRight(BorderStyle.THICK);
 
 	return headerStyle;
+    }
+
+    private static CellStyle createTableBodyStyle(XSSFWorkbook excel) {
+	// lineas de series
+	CellStyle style = excel.createCellStyle();
+	style.setFillForegroundColor(IndexedColors.SEA_GREEN.getIndex());
+	style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+	style.setWrapText(true);
+	style.setAlignment(HorizontalAlignment.CENTER);
+	style.setVerticalAlignment(VerticalAlignment.CENTER);
+	style.setBorderBottom(BorderStyle.THIN);
+
+	return style;
     }
 }

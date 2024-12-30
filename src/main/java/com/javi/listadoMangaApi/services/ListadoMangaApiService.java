@@ -14,6 +14,7 @@ import com.javi.listadoMangaApi.dto.MonthReleasesDto;
 import com.javi.listadoMangaApi.dto.SeriesDto;
 import com.javi.listadoMangaApi.dto.SeriesReleaseDto;
 import com.javi.listadoMangaApi.dto.SpPublisherDto;
+import com.javi.listadoMangaApi.exception.ExcelException;
 import com.javi.listadoMangaApi.exception.ExceptionFactory;
 import com.javi.listadoMangaApi.exception.GenericException;
 import com.javi.listadoMangaApi.scrapers.AuthorScraper;
@@ -94,7 +95,8 @@ public class ListadoMangaApiService {
 	}
     }
 
-    public MonthReleasesDto searchYearReleases(int year, boolean generateExcel) throws GenericException {
+    public MonthReleasesDto searchYearReleases(int year, boolean generateExcel)
+	    throws GenericException, ExcelException {
 	MonthReleasesDto yearReleases = new MonthReleasesDto("Novedades " + year, new ArrayList<>());
 	int lastVolumeCount = 0;
 	for (int i = 1; i < 13; i++) {
@@ -116,7 +118,7 @@ public class ListadoMangaApiService {
 	    try {
 		ExcelGenerator.generateExcelReleases(year, yearReleases.getSeriesReleases(), lastVolumeCount);
 	    } catch (IOException e) {
-		throw exceptionFactory.createGenericException();
+		throw exceptionFactory.createExcelException();
 	    }
 	}
 

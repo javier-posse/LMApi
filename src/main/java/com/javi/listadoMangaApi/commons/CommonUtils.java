@@ -12,6 +12,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.javi.listadoMangaApi.constants.UrlConstants;
 import com.javi.listadoMangaApi.dto.SeriesSimplifiedDto;
 
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,7 @@ public class CommonUtils {
 	publisherSeries.forEach(element -> {
 	    Elements seriesNameElement = element.getElementsByTag("a");
 	    seriesNameElement.forEach(seriesName -> {
-		int seriesId = getLinkId(seriesName);
+		int seriesId = getIdFromLink(seriesName);
 		String name = seriesName.text();
 		SeriesSimplifiedDto serie = new SeriesSimplifiedDto(seriesId, name);
 		series.add(serie);
@@ -47,8 +48,14 @@ public class CommonUtils {
 
     }
 
-    public static int getLinkId(Element link) {
+    public static int getIdFromLink(Element link) {
 	return Integer.parseInt(link.attr("href").split("=")[1]);
+    }
+
+    public static String getLinkFromId(int id, String type) {
+	StringBuilder linkSb = new StringBuilder(UrlConstants.BASE_URL);
+	linkSb.append(type).append("?").append(UrlConstants.ID_PARAM).append("=").append(id);
+	return linkSb.toString();
     }
 
     public static LocalDate fullDateConverter(String date) {

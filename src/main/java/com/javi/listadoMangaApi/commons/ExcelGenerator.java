@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -26,12 +27,12 @@ import org.apache.poi.ss.usermodel.DataValidationHelper;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xddf.usermodel.chart.AxisCrosses;
 import org.apache.poi.xddf.usermodel.chart.AxisPosition;
 import org.apache.poi.xddf.usermodel.chart.ChartTypes;
@@ -52,6 +53,7 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import com.javi.listadoMangaApi.constants.UrlConstants;
 import com.javi.listadoMangaApi.dto.SeriesReleaseDto;
 
 import lombok.extern.slf4j.Slf4j;
@@ -77,8 +79,8 @@ public class ExcelGenerator {
 	CellStyle headerStyle = createHeaderStyle(excel);
 	CellStyle tableBodyStyle = createTableBodyStyle(excel);
 	XSSFSheet sheetReleases = generateFirstSheet(excel, conts, seriesReleases, headerStyle, tableBodyStyle);
-	XSSFSheet sheetStatistics = generateSecondSheet(excel, conts, seriesReleases, headerStyle, sheetReleases,
-		lastVolumeCount);
+	XSSFSheet sheetStatistics = generateSecondSheet(excel, conts, seriesReleases, headerStyle, tableBodyStyle,
+		sheetReleases, lastVolumeCount);
 	generateThirdSheet(excel, sheetStatistics, conts);
 
 	// cierre y guardado del fichero
@@ -121,7 +123,7 @@ public class ExcelGenerator {
 	// lineas de fechas
 	CellStyle cellStyleDate = excel.createCellStyle();
 	CreationHelper createHelper = excel.getCreationHelper();
-	cellStyleDate.setDataFormat(createHelper.createDataFormat().getFormat("dd MMMM yyyy"));
+	cellStyleDate.setDataFormat(createHelper.createDataFormat().getFormat("MMMM/dd/yyyy"));
 	cellStyleDate.setFillForegroundColor(IndexedColors.SEA_GREEN.getIndex());
 	cellStyleDate.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 	cellStyleDate.setWrapText(true);
@@ -145,6 +147,10 @@ public class ExcelGenerator {
 
 	    Cell cell = row.createCell(0);
 	    cell.setCellValue(seriesReleases.get(i).getName());
+	    Hyperlink link = excel.getCreationHelper().createHyperlink(HyperlinkType.URL);
+	    link.setAddress(CommonUtils.getLinkFromId(seriesReleases.get(i).getId(), UrlConstants.SERIES_PATH));
+	    cell.setHyperlink(link);
+
 	    if (seriesReleases.get(i).getName().contains("Manía")
 		    && seriesReleases.get(i).getPublisherName().equals("Planeta Cómic")) {
 		contMangaMania[0]++;
@@ -172,35 +178,14 @@ public class ExcelGenerator {
 	    cell.setCellStyle(tableBodyStyle);
 	}
 
-	// crear tabla para bordes
-	CellRangeAddress regionBodyLeft = new CellRangeAddress(1, seriesReleases.size(), 0, 0);
-	CellRangeAddress regionBodyCenterLeft = new CellRangeAddress(1, seriesReleases.size(), 1, 1);
-	CellRangeAddress regionBodyCenterRight = new CellRangeAddress(1, seriesReleases.size(), 2, 2);
-	CellRangeAddress regionBodyRight = new CellRangeAddress(1, seriesReleases.size(), 3, 3);
-
-	// borders body
-	RegionUtil.setBorderTop(BorderStyle.THIN, regionBodyLeft, sheetReleases);
-	RegionUtil.setBorderBottom(BorderStyle.THIN, regionBodyLeft, sheetReleases);
-	RegionUtil.setBorderLeft(BorderStyle.THIN, regionBodyLeft, sheetReleases);
-	RegionUtil.setBorderRight(BorderStyle.THIN, regionBodyLeft, sheetReleases);
-	RegionUtil.setBorderTop(BorderStyle.THIN, regionBodyCenterLeft, sheetReleases);
-	RegionUtil.setBorderBottom(BorderStyle.THIN, regionBodyCenterLeft, sheetReleases);
-	RegionUtil.setBorderLeft(BorderStyle.THIN, regionBodyCenterLeft, sheetReleases);
-	RegionUtil.setBorderRight(BorderStyle.THIN, regionBodyCenterLeft, sheetReleases);
-	RegionUtil.setBorderTop(BorderStyle.THIN, regionBodyCenterRight, sheetReleases);
-	RegionUtil.setBorderBottom(BorderStyle.THIN, regionBodyCenterRight, sheetReleases);
-	RegionUtil.setBorderLeft(BorderStyle.THIN, regionBodyCenterRight, sheetReleases);
-	RegionUtil.setBorderRight(BorderStyle.THIN, regionBodyCenterRight, sheetReleases);
-	RegionUtil.setBorderTop(BorderStyle.THIN, regionBodyRight, sheetReleases);
-	RegionUtil.setBorderBottom(BorderStyle.THIN, regionBodyRight, sheetReleases);
-	RegionUtil.setBorderLeft(BorderStyle.THIN, regionBodyRight, sheetReleases);
-	RegionUtil.setBorderRight(BorderStyle.THIN, regionBodyRight, sheetReleases);
+	// filtros de tabla
+	sheetReleases.setAutoFilter(new CellRangeAddress(0, seriesReleases.size(), 1, 3));
 
 	return sheetReleases;
     }
 
     private static XSSFSheet generateSecondSheet(XSSFWorkbook excel, int[] conts, List<SeriesReleaseDto> seriesReleases,
-	    CellStyle headerStyle, XSSFSheet sheetReleases, int lastVolumeCount) {
+	    CellStyle headerStyle, CellStyle tableBodyStyle, XSSFSheet sheetReleases, int lastVolumeCount) {
 	// Generado hoja de estadisticas
 	XSSFSheet sheetStatistics = excel.createSheet("Estadísticas");
 	sheetStatistics.setColumnWidth(0, 15000);
@@ -227,11 +212,15 @@ public class ExcelGenerator {
 	Row headerRow = sheetStatistics.createRow(conts[1]++);
 	headerRow.createCell(0).setCellValue("Nombre editorial");
 	headerRow.createCell(1).setCellValue("Cantidad de lanzamientos");
+	headerRow.getCell(0).setCellStyle(headerStyle);
+	headerRow.getCell(1).setCellStyle(headerStyle);
 
 	for (Map.Entry<String, Integer> entry : sortedEditorialCounts) {
 	    Row rowPublishersTable = sheetStatistics.createRow(conts[1]++);
 	    rowPublishersTable.createCell(0).setCellValue(entry.getKey());
 	    rowPublishersTable.createCell(1).setCellValue(entry.getValue());
+	    rowPublishersTable.getCell(0).setCellStyle(tableBodyStyle);
+	    rowPublishersTable.getCell(1).setCellStyle(tableBodyStyle);
 	}
 	// total de tomos unicos y primeros tomos
 	int onlyVolumeCont = 0;
@@ -284,7 +273,7 @@ public class ExcelGenerator {
 	Cell celllMangaManiaCount = row13.createCell(4);
 	celllMangaManiaCount.setCellValue(conts[0]);
 
-	createMonthTable(conts, sheetReleases, sheetStatistics);
+	createMonthTable(conts, sheetReleases, sheetStatistics, headerStyle, tableBodyStyle);
 
 	return sheetStatistics;
 
@@ -322,7 +311,8 @@ public class ExcelGenerator {
 	pieChart.plot(data);
     }
 
-    private static void createMonthTable(int[] conts, XSSFSheet sheetReleases, XSSFSheet sheetStatistics) {
+    private static void createMonthTable(int[] conts, XSSFSheet sheetReleases, XSSFSheet sheetStatistics,
+	    CellStyle headerStyle, CellStyle tableBodyStyle) {
 	// genero un array de meses para crear un hashmap y así tenerlos ordenaicos
 	String[] mesesOrdenados = { "enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
 		"septiembre", "octubre", "noviembre", "diciembre" };
@@ -345,10 +335,14 @@ public class ExcelGenerator {
 	Row tempRow = sheetStatistics.createRow(conts[2]++);
 	tempRow.createCell(0).setCellValue("Mes");
 	tempRow.createCell(1).setCellValue("Novedades");
+	tempRow.getCell(0).setCellStyle(headerStyle);
+	tempRow.getCell(1).setCellStyle(headerStyle);
 	for (Map.Entry<String, Integer> entry : novedadesPorMes.entrySet()) {
 	    tempRow = sheetStatistics.createRow(conts[2]++);
 	    tempRow.createCell(0).setCellValue(StringUtils.capitalize(entry.getKey()));
 	    tempRow.createCell(1).setCellValue(entry.getValue());
+	    tempRow.getCell(0).setCellStyle(tableBodyStyle);
+	    tempRow.getCell(1).setCellStyle(tableBodyStyle);
 	}
     }
 
@@ -406,7 +400,11 @@ public class ExcelGenerator {
 	style.setWrapText(true);
 	style.setAlignment(HorizontalAlignment.CENTER);
 	style.setVerticalAlignment(VerticalAlignment.CENTER);
+
 	style.setBorderBottom(BorderStyle.THIN);
+	style.setBorderTop(BorderStyle.THIN);
+	style.setBorderLeft(BorderStyle.THIN);
+	style.setBorderRight(BorderStyle.THIN);
 
 	return style;
     }

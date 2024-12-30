@@ -53,7 +53,7 @@ public class JpPublisherScraper {
 		    series = new ArrayList<>();
 		}
 	    } else {
-		int seriesId = CommonUtils.getLinkId(seriesElem.first());
+		int seriesId = CommonUtils.getIdFromLink(seriesElem.first());
 		String name = seriesElem.text();
 		SeriesSimplifiedDto serie = new SeriesSimplifiedDto(seriesId, name);
 		series.add(serie);

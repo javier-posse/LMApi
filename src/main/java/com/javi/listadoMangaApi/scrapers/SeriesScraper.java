@@ -40,7 +40,7 @@ public class SeriesScraper {
 	    }
 	}
 	linkData.forEach(data -> {
-	    idCollector.add(CommonUtils.getLinkId(data));
+	    idCollector.add(CommonUtils.getIdFromLink(data));
 	    linkCollector.add(data.text());
 	});
 	List<VolumeDto> volumes = new ArrayList<>();

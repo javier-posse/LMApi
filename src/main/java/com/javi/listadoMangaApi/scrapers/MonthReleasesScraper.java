@@ -66,13 +66,13 @@ public class MonthReleasesScraper {
 	    if (cont > 0) {
 		for (int c = 1; c < cont + 1; c++) {
 		    if (c == 1) {
-			releaseId = CommonUtils.getLinkId(children.get(i + c));
+			releaseId = CommonUtils.getIdFromLink(children.get(i + c));
 			releaseName = children.get(i + c).text();
 		    } else if (c == 2) {
-			releaseAuthId = CommonUtils.getLinkId(children.get(i + c));
+			releaseAuthId = CommonUtils.getIdFromLink(children.get(i + c));
 			releaseAuthName = children.get(i + c).text();
 		    } else if (c == 3) {
-			releaseArtistId = CommonUtils.getLinkId(children.get(i + c));
+			releaseArtistId = CommonUtils.getIdFromLink(children.get(i + c));
 			releaseArtistName = children.get(i + c).text();
 		    }
 		}

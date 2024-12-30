@@ -11,6 +11,7 @@ import com.javi.listadoMangaApi.dto.JpPublisherDto;
 import com.javi.listadoMangaApi.dto.MonthReleasesDto;
 import com.javi.listadoMangaApi.dto.SeriesDto;
 import com.javi.listadoMangaApi.dto.SpPublisherDto;
+import com.javi.listadoMangaApi.exception.ExcelException;
 import com.javi.listadoMangaApi.exception.GenericException;
 import com.javi.listadoMangaApi.services.ListadoMangaApiService;
 
@@ -54,7 +55,7 @@ public class ListadoMangaApiControllerV1 {
 
     @GetMapping("/yearReleases/{year}")
     public MonthReleasesDto getMonthReleases(@PathVariable int year, @RequestParam boolean generateExcel)
-	    throws GenericException {
+	    throws GenericException, ExcelException {
 	return apiService.searchYearReleases(year, generateExcel);
     }
 

@@ -32,6 +32,3 @@ El excel generado se puede encontrar en /Excel.
 Por favor, tenga en cuenta que el código no tendrá ningún excel ya generado de ningún año. Si quiere uno, debe lanzar el endpoint de novedades de un año con el parámetro correspondiente.
 
 Hay un dockerfile. Si se va a usar docker para desplegarlo, hay que montar el path de /Excel para poder acceder a él. Se crea en el root del docker.
-
-## Errores conocidos
-La funcionalidad de la serie debe ser reescrita casi por completo.

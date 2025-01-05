@@ -41,61 +41,69 @@ public class SeriesScraper {
     private List<VolumeDto> getVolumes(Elements volumesInfo) {
 	List<VolumeDto> volumes = new ArrayList<>();
 	volumesInfo.forEach(volume -> {
-	    String volumeName = "";
-	    String volumePages = null;
-	    String volumePrice = null;
-	    String volumeDate = null;
-	    String[] volumeSplit = volume.toString().split("<br>");
-	    if (volumeSplit.length > 2) {
-		for (int i = volumeSplit.length - 1; i > -1; i--) {
-		    if (i == volumeSplit.length - 1) {
-			volumeDate = volumeSplit[i].trim();
-		    } else if (i == volumeSplit.length - 2) {
-			volumePrice = volumeSplit[i].trim();
-		    } else if (i == volumeSplit.length - 3) {
-			if (volumeSplit[i].contains("páginas")) {
-			    volumePages = volumeSplit[i].trim();
-			} else {
-
-			    volumeName = volumeName + volumeSplit[i];
-			}
-		    } else {
-			int divLoc = volumeSplit[i].indexOf("/div>");
-			volumeName = volumeSplit[i].substring(divLoc + 4, volumeSplit[i].length()) + " "
-				+ volumeName.trim();
-		    }
-		}
-	    } else {
-		for (String volumeString : volumeSplit) {
-		    int divLoc = volumeString.indexOf("/div>");
-		    int htmlLoc = volumeString.indexOf("</td>");
-		    if (htmlLoc != -1) {
-			volumeName = volumeName + " " + volumeString.substring(divLoc + 4, htmlLoc);
-		    } else {
-			volumeName = volumeName + " " + volumeString.substring(divLoc + 4, volumeString.length());
-		    }
-		}
-	    }
-	    if (volumeDate != null) {
-		Document volumeDateDoc = Jsoup.parse(volumeDate);
-		volumeDate = volumeDateDoc.text();
-	    }
-
-	    VolumeDto volumeFinal = new VolumeDto(
-		    volumeName.trim().replace("\\n", "").replace(">", "").replace("</a", ""), volumePages, volumePrice,
-		    volumeDate);
+	    VolumeDto volumeFinal = getVolumeInfo(volume);
 	    volumes.add(volumeFinal);
 	});
 	return volumes;
+    }
+
+    private VolumeDto getVolumeInfo(Element volume) {
+	StringBuilder volumeName = new StringBuilder();
+	String volumePages = null;
+	String volumePrice = null;
+	String volumeDate = null;
+	String[] volumeSplit = volume.toString().split("<br>");
+	if (volumeSplit.length > 2) {
+	    volumeDate = getVolumeDate(volumeSplit);
+	    volumePrice = getVolumePrice(volumeSplit);
+	    volumePages = getVolumePages(volumeSplit);
+	    for (int i = volumeSplit.length - 3; i > -1; i--) {
+		if ((i == volumeSplit.length - 3) && (!volumeSplit[i].contains("páginas"))) {
+		    volumeName.append(volumeSplit[i]);
+		} else if (!volumeSplit[i].contains("páginas")) {
+		    int divLoc = volumeSplit[i].indexOf("/div>");
+		    volumeName.insert(0, volumeSplit[i].substring(divLoc + 4, volumeSplit[i].length()) + " ");
+		}
+	    }
+	} else {
+	    for (String volumeString : volumeSplit) {
+		int divLoc = volumeString.indexOf("/div>");
+		int htmlLoc = volumeString.indexOf("</td>");
+		if (htmlLoc != -1) {
+		    volumeName.append(" " + volumeString.substring(divLoc + 4, htmlLoc));
+		} else {
+		    volumeName.append(" " + volumeString.substring(divLoc + 4, volumeString.length()));
+		}
+	    }
+	}
+
+	return new VolumeDto(volumeName.toString().trim().replace("\\n", "").replace(">", "").replace("</a", ""),
+		volumePages, volumePrice, volumeDate);
+    }
+
+    private String getVolumeDate(String[] volumeSplit) {
+	String volumeDate = volumeSplit[volumeSplit.length - 1].trim();
+	Document volumeDateDoc = Jsoup.parse(volumeDate);
+	return volumeDateDoc.text();
+    }
+
+    private String getVolumePrice(String[] volumeSplit) {
+	return volumeSplit[volumeSplit.length - 2].trim();
+    }
+
+    private String getVolumePages(String[] volumeSplit) {
+	if (volumeSplit[volumeSplit.length - 3].contains("páginas")) {
+	    return volumeSplit[volumeSplit.length - 3].trim();
+	}
+	return null;
     }
 
     private SeriesInfoDto getSeriesInfo(Document doc) {
 	Element info = doc.selectFirst("td.izq");
 	SeriesInfoDto seriesInfo = new SeriesInfoDto();
 
-	if (info != null) {
-	    Elements infoElements = info.children();
-	    for (Element element : infoElements) {
+	if (doc.selectFirst("td.izq") != null) {
+	    for (Element element : info.children()) {
 		if (element.tagName().equals("b")) {
 		    String key = element.text().replace(":", "").trim();
 		    Node value = element.nextSibling();

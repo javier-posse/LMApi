@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.javi.listadoMangaApi.commons.CommonUtils;
 import com.javi.listadoMangaApi.constants.UrlConstants;
+import com.javi.listadoMangaApi.dto.AuthorDto;
 import com.javi.listadoMangaApi.dto.SeriesDto;
 import com.javi.listadoMangaApi.dto.SeriesInfoDto;
 import com.javi.listadoMangaApi.dto.VolumeDto;
@@ -53,18 +54,11 @@ public class SeriesScraper {
 	String volumePrice = null;
 	String volumeDate = null;
 	String[] volumeSplit = volume.toString().split("<br>");
-	if (volumeSplit.length > 2) {
+	if (volumeSplit.length > 3) {
 	    volumeDate = getVolumeDate(volumeSplit);
 	    volumePrice = getVolumePrice(volumeSplit);
 	    volumePages = getVolumePages(volumeSplit);
-	    for (int i = volumeSplit.length - 3; i > -1; i--) {
-		if ((i == volumeSplit.length - 3) && (!volumeSplit[i].contains("páginas"))) {
-		    volumeName.append(volumeSplit[i]);
-		} else if (!volumeSplit[i].contains("páginas")) {
-		    int divLoc = volumeSplit[i].indexOf("/div>");
-		    volumeName.insert(0, volumeSplit[i].substring(divLoc + 4, volumeSplit[i].length()) + " ");
-		}
-	    }
+	    volumeName.append(getVolumeName(volumeSplit));
 	} else {
 	    for (String volumeString : volumeSplit) {
 		int divLoc = volumeString.indexOf("/div>");
@@ -79,6 +73,17 @@ public class SeriesScraper {
 
 	return new VolumeDto(volumeName.toString().trim().replace("\\n", "").replace(">", "").replace("</a", ""),
 		volumePages, volumePrice, volumeDate);
+    }
+
+    private String getVolumeName(String[] volumeSplit) {
+	StringBuilder volumeName = new StringBuilder();
+	for (int i = 0; i < volumeSplit.length - 2; i++) {
+	    if (!volumeSplit[i].contains("páginas")) {
+		int divLoc = volumeSplit[i].indexOf("/div>");
+		volumeName.append(volumeSplit[i].substring(divLoc + 4, volumeSplit[i].length()) + " ");
+	    }
+	}
+	return volumeName.toString();
     }
 
     private String getVolumeDate(String[] volumeSplit) {
@@ -124,9 +129,16 @@ public class SeriesScraper {
 			seriesInfo.setArtistName(((Element) value).text());
 			seriesInfo.setArtistId(CommonUtils.getIdFromLink(((Element) value)));
 			break;
+		    case "Diseño de personajes":
+			seriesInfo.setCharacterDesignName(((Element) value).text());
+			seriesInfo.setCharacterDesignId(CommonUtils.getIdFromLink(((Element) value)));
+			break;
 		    case "Historia original":
 			seriesInfo.setOriginalStoryName(((Element) value).text());
 			seriesInfo.setOriginalStoryId(CommonUtils.getIdFromLink(((Element) value)));
+			break;
+		    case "Autores":
+			seriesInfo.setAuthors(generateAuthorsList(value));
 			break;
 		    case "Color":
 			seriesInfo.setColorName(((Element) value).text());
@@ -165,6 +177,31 @@ public class SeriesScraper {
 	    }
 	}
 	return seriesInfo;
+    }
+
+    private AuthorDto[] generateAuthorsList(Node author) {
+	List<AuthorDto> authors = new ArrayList<>();
+
+	if (((Element) author).tagName().equals("a")) {
+	    int authorId = CommonUtils.getIdFromLink(((Element) author));
+	    String authorName = ((Element) author).text();
+	    authors.add(new AuthorDto(authorId, authorName, null, null));
+	}
+	Node sibling = author.nextSibling();
+	while (sibling != null) {
+	    if (sibling instanceof Element element) {
+		if (element.tagName().equals("a")) {
+		    int authorId = CommonUtils.getIdFromLink((element));
+		    String authorName = element.text();
+		    authors.add(new AuthorDto(authorId, authorName, null, null));
+		} else if (element.tagName().equals("br")) {
+		    break;
+		}
+	    }
+	    sibling = sibling.nextSibling();
+	}
+
+	return authors.toArray(new AuthorDto[0]);
     }
 
 }

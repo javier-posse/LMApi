@@ -23,7 +23,7 @@ public class SeriesInfoDto {
     private int originalStoryId;
     private String originalStoryName;
     private int characterDesignId;
-    private String characterDesingName;
+    private String characterDesignName;
     private int colorId;
     private String colorName;
     private int translatorId;

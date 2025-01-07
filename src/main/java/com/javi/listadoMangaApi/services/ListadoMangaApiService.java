@@ -51,7 +51,7 @@ public class ListadoMangaApiService {
 	try {
 	    return authorScraper.scrapAuthorPage(id);
 	} catch (IOException e) {
-	    throw exceptionFactory.createGenericException();
+	    throw exceptionFactory.createGenericException(e);
 	}
     }
 
@@ -59,7 +59,7 @@ public class ListadoMangaApiService {
 	try {
 	    return collectionScraper.scrapCollectionPage(id);
 	} catch (IOException e) {
-	    throw exceptionFactory.createGenericException();
+	    throw exceptionFactory.createGenericException(e);
 	}
     }
 
@@ -67,7 +67,7 @@ public class ListadoMangaApiService {
 	try {
 	    return publisherScrapper.scrapSpPublisherPage(id);
 	} catch (IOException e) {
-	    throw exceptionFactory.createGenericException();
+	    throw exceptionFactory.createGenericException(e);
 	}
     }
 
@@ -75,7 +75,7 @@ public class ListadoMangaApiService {
 	try {
 	    return jpPublisherScraper.scrapJpPublisherPage(id);
 	} catch (IOException e) {
-	    throw exceptionFactory.createGenericException();
+	    throw exceptionFactory.createGenericException(e);
 	}
     }
 
@@ -83,7 +83,7 @@ public class ListadoMangaApiService {
 	try {
 	    return seriesScraper.scrapSeriesPage(id);
 	} catch (Exception e) {
-	    throw exceptionFactory.createGenericException();
+	    throw exceptionFactory.createGenericException(e);
 	}
     }
 
@@ -91,7 +91,7 @@ public class ListadoMangaApiService {
 	try {
 	    return monthReleasesScraper.scrapMonthReleasesPage(month, year);
 	} catch (IOException e) {
-	    throw exceptionFactory.createGenericException();
+	    throw exceptionFactory.createGenericException(e);
 	}
     }
 
@@ -105,7 +105,7 @@ public class ListadoMangaApiService {
 	    try {
 		seriesReleases = monthReleasesScraper.scrapMonthReleasesPage(i, year).getSeriesReleases();
 	    } catch (IOException e) {
-		throw exceptionFactory.createGenericException();
+		throw exceptionFactory.createGenericException(e);
 	    }
 
 	    // Uso el list anterior para filtrar en que importa de verdad
@@ -118,7 +118,7 @@ public class ListadoMangaApiService {
 	    try {
 		ExcelGenerator.generateExcelReleases(year, yearReleases.getSeriesReleases(), lastVolumeCount);
 	    } catch (IOException e) {
-		throw exceptionFactory.createExcelException();
+		throw exceptionFactory.createExcelException(e);
 	    }
 	}
 

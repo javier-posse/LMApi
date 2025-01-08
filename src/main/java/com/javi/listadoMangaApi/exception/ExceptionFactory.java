@@ -2,7 +2,7 @@ package com.javi.listadoMangaApi.exception;
 
 import org.springframework.stereotype.Component;
 
-import com.javi.listadoMangaApi.config.AppConfig;
+import com.javi.listadoMangaApi.config.ErrorsConfig;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,9 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ExceptionFactory {
 
-    private final AppConfig configUtil;
+    private final ErrorsConfig configUtil;
 
-    public ExceptionFactory(AppConfig configUtil) {
+    public ExceptionFactory(ErrorsConfig configUtil) {
 	this.configUtil = configUtil;
     }
 

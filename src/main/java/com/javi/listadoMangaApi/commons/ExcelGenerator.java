@@ -53,6 +53,7 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import com.javi.listadoMangaApi.config.ExcelConfig;
 import com.javi.listadoMangaApi.constants.UrlConstants;
 import com.javi.listadoMangaApi.dto.SeriesReleaseDto;
 
@@ -80,7 +81,7 @@ public class ExcelGenerator {
 	CellStyle tableBodyStyle = createTableBodyStyle(excel);
 	XSSFSheet sheetReleases = generateFirstSheet(excel, conts, seriesReleases, headerStyle, tableBodyStyle);
 	XSSFSheet sheetStatistics = generateSecondSheet(excel, conts, seriesReleases, headerStyle, tableBodyStyle,
-		sheetReleases, lastVolumeCount);
+		sheetReleases, lastVolumeCount, year);
 	generateThirdSheet(excel, sheetStatistics, conts);
 
 	// cierre y guardado del fichero
@@ -185,7 +186,7 @@ public class ExcelGenerator {
     }
 
     private static XSSFSheet generateSecondSheet(XSSFWorkbook excel, int[] conts, List<SeriesReleaseDto> seriesReleases,
-	    CellStyle headerStyle, CellStyle tableBodyStyle, XSSFSheet sheetReleases, int lastVolumeCount) {
+	    CellStyle headerStyle, CellStyle tableBodyStyle, XSSFSheet sheetReleases, int lastVolumeCount, int year) {
 	// Generado hoja de estadisticas
 	XSSFSheet sheetStatistics = excel.createSheet("Estadísticas");
 	sheetStatistics.setColumnWidth(0, 15000);
@@ -274,9 +275,34 @@ public class ExcelGenerator {
 	celllMangaManiaCount.setCellValue(conts[0]);
 
 	createMonthTable(conts, sheetReleases, sheetStatistics, headerStyle, tableBodyStyle);
+	generatePastYearsStatsTable(sheetStatistics, year, headerStyle, tableBodyStyle);
 
 	return sheetStatistics;
 
+    }
+
+    private static void generatePastYearsStatsTable(XSSFSheet sheetStatistics, int year, CellStyle headerStyle,
+	    CellStyle tableBodyStyle) {
+	Row rowHeader = sheetStatistics.getRow(18);
+	Cell cellReleasesHeaderYear = rowHeader.createCell(3);
+	cellReleasesHeaderYear.setCellValue("Año");
+	cellReleasesHeaderYear.setCellStyle(headerStyle);
+	Cell cellReleasesHeaderQtty = rowHeader.createCell(4);
+	cellReleasesHeaderQtty.setCellValue("Novedades");
+	cellReleasesHeaderQtty.setCellStyle(headerStyle);
+
+	ExcelConfig config = new ExcelConfig();
+	for (int i = 1; i < 6; i++) {
+	    if (config.getProperty("year.releases." + (year - i)) != null) {
+		Row row = sheetStatistics.getRow(18 + i);
+		Cell cellReleasesYear = row.createCell(3);
+		cellReleasesYear.setCellValue(year - i);
+		cellReleasesYear.setCellStyle(tableBodyStyle);
+		Cell cellReleasesQtty = row.createCell(4);
+		cellReleasesQtty.setCellValue(config.getProperty("year.releases." + (year - i)));
+		cellReleasesQtty.setCellStyle(tableBodyStyle);
+	    }
+	}
     }
 
     private static XSSFSheet generateThirdSheet(XSSFWorkbook excel, XSSFSheet sheetStatistics, int[] conts) {

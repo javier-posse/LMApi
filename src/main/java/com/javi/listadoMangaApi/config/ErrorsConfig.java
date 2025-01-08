@@ -6,11 +6,11 @@ import org.springframework.core.env.Environment;
 
 @Configuration
 @PropertySource("classpath:errors.properties")
-public class AppConfig {
+public class ErrorsConfig {
 
     private Environment env;
 
-    public AppConfig(Environment env) {
+    public ErrorsConfig(Environment env) {
 	this.env = env;
     }
 

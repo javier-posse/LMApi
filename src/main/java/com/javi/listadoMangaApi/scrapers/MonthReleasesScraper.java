@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MonthReleasesScraper {
 
     public MonthReleasesDto scrapMonthReleasesPage(int month, int year) throws IOException {
+	log.info("MonthReleasesScraper inicializado");
 	String link = UrlConstants.BASE_URL + UrlConstants.CALENDAR_PATH + "?" + UrlConstants.MONTH_CALENDAR_PARAM + "="
 		+ month + "&" + UrlConstants.YEAR_CALENDAR_PARAM + "=" + year;
 	MonthReleasesDto monthReleases = null;

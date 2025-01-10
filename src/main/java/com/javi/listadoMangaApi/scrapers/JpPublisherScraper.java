@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JpPublisherScraper {
 
     public JpPublisherDto scrapJpPublisherPage(int id) throws IOException {
+	log.info("JpPublisherScraper inicializado");
 	String link = UrlConstants.BASE_URL + UrlConstants.ORIGINAL_PUBLISHER_PATH + "?" + UrlConstants.ID_PARAM + "="
 		+ id;
 	JpPublisherDto jpPublisherDto = null;

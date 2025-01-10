@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthorScraper {
 
     public AuthorDto scrapAuthorPage(int id) throws IOException {
+	log.info("AuthorScraper inicializado");
 	String link = UrlConstants.BASE_URL + UrlConstants.AUTHOR_PATH + "?" + UrlConstants.ID_PARAM + "=" + id;
 	AuthorDto author = null;
 

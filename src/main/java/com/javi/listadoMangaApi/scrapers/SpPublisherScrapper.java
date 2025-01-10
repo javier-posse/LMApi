@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SpPublisherScrapper {
 
     public SpPublisherDto scrapSpPublisherPage(int id) throws IOException {
+	log.info("SpPublisherScrapper inicializado");
 	String link = UrlConstants.BASE_URL + UrlConstants.PUBLISHER_PATH + "?" + UrlConstants.ID_PARAM + "=" + id;
 	SpPublisherDto spPublisherDto = null;
 

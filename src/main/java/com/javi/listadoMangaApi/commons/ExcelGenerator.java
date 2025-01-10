@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -68,6 +69,8 @@ public class ExcelGenerator {
 
     public static String generateExcelReleases(int year, List<SeriesReleaseDto> seriesReleases, int lastVolumeCount)
 	    throws IOException {
+
+	log.info("ExcelGenerator inicializado");
 
 	// Genero lo necesario para guardar el fichero
 	File currDir = new File("./Excel");
@@ -278,6 +281,8 @@ public class ExcelGenerator {
 	createMonthTable(conts, sheetReleases, sheetStatistics, headerStyle, tableBodyStyle);
 	generatePastYearsReleasesTable(sheetStatistics, year, headerStyle, tableBodyStyle);
 	generatePastYearsClosedTable(sheetStatistics, year, headerStyle, tableBodyStyle);
+	generatePastYearsOnlyVolumesTable(sheetStatistics, year, headerStyle, tableBodyStyle);
+	generatePastYearNewSeriesTable(sheetStatistics, year, headerStyle, tableBodyStyle);
 
 	return sheetStatistics;
 
@@ -286,6 +291,9 @@ public class ExcelGenerator {
     private static void generatePastYearsReleasesTable(XSSFSheet sheetStatistics, int year, CellStyle headerStyle,
 	    CellStyle tableBodyStyle) {
 	Row rowHeader = sheetStatistics.getRow(18);
+	if (rowHeader == null) {
+	    rowHeader = sheetStatistics.createRow(18);
+	}
 	Cell cellReleasesHeaderYear = rowHeader.createCell(3);
 	cellReleasesHeaderYear.setCellValue("Año");
 	cellReleasesHeaderYear.setCellStyle(headerStyle);
@@ -313,6 +321,9 @@ public class ExcelGenerator {
     private static void generatePastYearsClosedTable(XSSFSheet sheetStatistics, int year, CellStyle headerStyle,
 	    CellStyle tableBodyStyle) {
 	Row rowHeader = sheetStatistics.getRow(28);
+	if (rowHeader == null) {
+	    rowHeader = sheetStatistics.createRow(28);
+	}
 	Cell cellReleasesHeaderYear = rowHeader.createCell(3);
 	cellReleasesHeaderYear.setCellValue("Año");
 	cellReleasesHeaderYear.setCellStyle(headerStyle);
@@ -337,6 +348,66 @@ public class ExcelGenerator {
 	}
     }
 
+    private static void generatePastYearsOnlyVolumesTable(XSSFSheet sheetStatistics, int year, CellStyle headerStyle,
+	    CellStyle tableBodyStyle) {
+	Row rowHeader = sheetStatistics.getRow(38);
+	if (rowHeader == null) {
+	    rowHeader = sheetStatistics.createRow(38);
+	}
+	Cell cellReleasesHeaderYear = rowHeader.createCell(3);
+	cellReleasesHeaderYear.setCellValue("Año");
+	cellReleasesHeaderYear.setCellStyle(headerStyle);
+	Cell cellReleasesHeaderQtty = rowHeader.createCell(4);
+	cellReleasesHeaderQtty.setCellValue("Tomos únicos");
+	cellReleasesHeaderQtty.setCellStyle(headerStyle);
+
+	ExcelConfig config = new ExcelConfig();
+	for (int i = 1; i < 6; i++) {
+	    if (config.getProperty("year.onlyVolumes." + (year - i)) != null) {
+		Row row = sheetStatistics.getRow(38 + i);
+		if (row == null) {
+		    row = sheetStatistics.createRow(38 + i);
+		}
+		Cell cellReleasesYear = row.createCell(3);
+		cellReleasesYear.setCellValue(year - i);
+		cellReleasesYear.setCellStyle(tableBodyStyle);
+		Cell cellReleasesQtty = row.createCell(4);
+		cellReleasesQtty.setCellValue(Integer.valueOf(config.getProperty("year.onlyVolumes." + (year - i))));
+		cellReleasesQtty.setCellStyle(tableBodyStyle);
+	    }
+	}
+    }
+
+    private static void generatePastYearNewSeriesTable(XSSFSheet sheetStatistics, int year, CellStyle headerStyle,
+	    CellStyle tableBodyStyle) {
+	Row rowHeader = sheetStatistics.getRow(48);
+	if (rowHeader == null) {
+	    rowHeader = sheetStatistics.createRow(48);
+	}
+	Cell cellReleasesHeaderYear = rowHeader.createCell(3);
+	cellReleasesHeaderYear.setCellValue("Año");
+	cellReleasesHeaderYear.setCellStyle(headerStyle);
+	Cell cellReleasesHeaderQtty = rowHeader.createCell(4);
+	cellReleasesHeaderQtty.setCellValue("Series nuevas");
+	cellReleasesHeaderQtty.setCellStyle(headerStyle);
+
+	ExcelConfig config = new ExcelConfig();
+	for (int i = 1; i < 6; i++) {
+	    if (config.getProperty("year.newSeries." + (year - i)) != null) {
+		Row row = sheetStatistics.getRow(48 + i);
+		if (row == null) {
+		    row = sheetStatistics.createRow(48 + i);
+		}
+		Cell cellReleasesYear = row.createCell(3);
+		cellReleasesYear.setCellValue(year - i);
+		cellReleasesYear.setCellStyle(tableBodyStyle);
+		Cell cellReleasesQtty = row.createCell(4);
+		cellReleasesQtty.setCellValue(Integer.valueOf(config.getProperty("year.newSeries." + (year - i))));
+		cellReleasesQtty.setCellStyle(tableBodyStyle);
+	    }
+	}
+    }
+
     private static XSSFSheet generateThirdSheet(XSSFWorkbook excel, XSSFSheet sheetStatistics, int[] conts) {
 	XSSFSheet sheetCharts = excel.createSheet("Gráficas");
 	createCharts(sheetStatistics, sheetCharts, conts);
@@ -348,6 +419,8 @@ public class ExcelGenerator {
 	createMonthChart(sheetStatistics, sheetCharts, conts);
 	createYearReleasesChart(sheetStatistics, sheetCharts);
 	createYearClosedChart(sheetStatistics, sheetCharts);
+	createYearOnlyVolumesChart(sheetStatistics, sheetCharts);
+	createYearNewSeriesChart(sheetStatistics, sheetCharts);
 
     }
 
@@ -433,6 +506,18 @@ public class ExcelGenerator {
     }
 
     private static void createYearReleasesChart(XSSFSheet sheetStatistics, XSSFSheet sheetCharts) {
+
+	List<String> yearsList = new ArrayList<>();
+	for (int i = 19; i <= 23; i++) {
+	    yearsList.add(String.valueOf((int) sheetStatistics.getRow(i).getCell(3).getNumericCellValue()));
+	}
+	Collections.reverse(yearsList);
+	List<Double> releasesList = new ArrayList<>();
+	for (int i = 19; i <= 23; i++) {
+	    releasesList.add(sheetStatistics.getRow(i).getCell(4).getNumericCellValue());
+	}
+	Collections.reverse(releasesList);
+
 	XSSFDrawing yearReleasesChartDrawing = sheetCharts.createDrawingPatriarch();
 	XSSFClientAnchor anchor = yearReleasesChartDrawing.createAnchor(0, 0, 0, 0, 0, 38, 15, 48);
 	XSSFChart chart = yearReleasesChartDrawing.createChart(anchor);
@@ -445,10 +530,9 @@ public class ExcelGenerator {
 	XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.BOTTOM);
 	leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
 
-	XDDFDataSource<String> years = XDDFDataSourcesFactory.fromStringCellRange(sheetStatistics,
-		new CellRangeAddress(19, 23, 3, 3));
-	XDDFNumericalDataSource<Double> releases = XDDFDataSourcesFactory.fromNumericCellRange(sheetStatistics,
-		new CellRangeAddress(19, 23, 4, 4));
+	XDDFDataSource<String> years = XDDFDataSourcesFactory.fromArray(yearsList.toArray(new String[0]));
+	XDDFNumericalDataSource<Double> releases = XDDFDataSourcesFactory
+		.fromArray(releasesList.toArray(new Double[0]));
 
 	XDDFLineChartData chartData = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
 	XDDFLineChartData.Series charSeries = (XDDFLineChartData.Series) chartData.addSeries(years, releases);
@@ -457,8 +541,20 @@ public class ExcelGenerator {
     }
 
     private static void createYearClosedChart(XSSFSheet sheetStatistics, XSSFSheet sheetCharts) {
+
+	List<String> yearsList = new ArrayList<>();
+	for (int i = 29; i <= 33; i++) {
+	    yearsList.add(String.valueOf((int) sheetStatistics.getRow(i).getCell(3).getNumericCellValue()));
+	}
+	Collections.reverse(yearsList);
+	List<Double> closedList = new ArrayList<>();
+	for (int i = 29; i <= 33; i++) {
+	    closedList.add(sheetStatistics.getRow(i).getCell(4).getNumericCellValue());
+	}
+	Collections.reverse(closedList);
+
 	XSSFDrawing yearReleasesChartDrawing = sheetCharts.createDrawingPatriarch();
-	XSSFClientAnchor anchor = yearReleasesChartDrawing.createAnchor(0, 0, 0, 0, 0, 51, 15, 60);
+	XSSFClientAnchor anchor = yearReleasesChartDrawing.createAnchor(0, 0, 0, 0, 0, 51, 15, 61);
 	XSSFChart chart = yearReleasesChartDrawing.createChart(anchor);
 	chart.setTitleText("Series cerradas años anteriores");
 	chart.setTitleOverlay(false);
@@ -469,14 +565,81 @@ public class ExcelGenerator {
 	XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.BOTTOM);
 	leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
 
-	XDDFDataSource<String> years = XDDFDataSourcesFactory.fromStringCellRange(sheetStatistics,
-		new CellRangeAddress(29, 33, 3, 3));
-	XDDFNumericalDataSource<Double> closed = XDDFDataSourcesFactory.fromNumericCellRange(sheetStatistics,
-		new CellRangeAddress(29, 33, 4, 4));
+	XDDFDataSource<String> years = XDDFDataSourcesFactory.fromArray(yearsList.toArray(new String[0]));
+	XDDFNumericalDataSource<Double> closed = XDDFDataSourcesFactory.fromArray(closedList.toArray(new Double[0]));
 
 	XDDFLineChartData chartData = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
 	XDDFLineChartData.Series charSeries = (XDDFLineChartData.Series) chartData.addSeries(years, closed);
 	charSeries.setTitle("Series cerradas en los años", null);
+	chart.plot(chartData);
+    }
+
+    private static void createYearOnlyVolumesChart(XSSFSheet sheetStatistics, XSSFSheet sheetCharts) {
+
+	List<String> yearsList = new ArrayList<>();
+	for (int i = 29; i <= 33; i++) {
+	    yearsList.add(String.valueOf((int) sheetStatistics.getRow(i).getCell(3).getNumericCellValue()));
+	}
+	Collections.reverse(yearsList);
+	List<Double> onlyVolumesList = new ArrayList<>();
+	for (int i = 29; i <= 33; i++) {
+	    onlyVolumesList.add(sheetStatistics.getRow(i).getCell(4).getNumericCellValue());
+	}
+	Collections.reverse(onlyVolumesList);
+
+	XSSFDrawing yearReleasesChartDrawing = sheetCharts.createDrawingPatriarch();
+	XSSFClientAnchor anchor = yearReleasesChartDrawing.createAnchor(0, 0, 0, 0, 0, 63, 15, 73);
+	XSSFChart chart = yearReleasesChartDrawing.createChart(anchor);
+	chart.setTitleText("Tomos únicos años anteriores");
+	chart.setTitleOverlay(false);
+	XDDFChartLegend monthLegend = chart.getOrAddLegend();
+	monthLegend.setPosition(LegendPosition.BOTTOM);
+
+	XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.LEFT);
+	XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.BOTTOM);
+	leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
+
+	XDDFDataSource<String> years = XDDFDataSourcesFactory.fromArray(yearsList.toArray(new String[0]));
+	XDDFNumericalDataSource<Double> closed = XDDFDataSourcesFactory
+		.fromArray(onlyVolumesList.toArray(new Double[0]));
+
+	XDDFLineChartData chartData = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
+	XDDFLineChartData.Series charSeries = (XDDFLineChartData.Series) chartData.addSeries(years, closed);
+	charSeries.setTitle("Tomos únicos en los años", null);
+	chart.plot(chartData);
+    }
+
+    private static void createYearNewSeriesChart(XSSFSheet sheetStatistics, XSSFSheet sheetCharts) {
+
+	List<String> yearsList = new ArrayList<>();
+	for (int i = 29; i <= 33; i++) {
+	    yearsList.add(String.valueOf((int) sheetStatistics.getRow(i).getCell(3).getNumericCellValue()));
+	}
+	Collections.reverse(yearsList);
+	List<Double> newSeriesList = new ArrayList<>();
+	for (int i = 29; i <= 33; i++) {
+	    newSeriesList.add(sheetStatistics.getRow(i).getCell(4).getNumericCellValue());
+	}
+	Collections.reverse(newSeriesList);
+
+	XSSFDrawing yearReleasesChartDrawing = sheetCharts.createDrawingPatriarch();
+	XSSFClientAnchor anchor = yearReleasesChartDrawing.createAnchor(0, 0, 0, 0, 0, 76, 15, 86);
+	XSSFChart chart = yearReleasesChartDrawing.createChart(anchor);
+	chart.setTitleText("Series nuevas años anteriores");
+	chart.setTitleOverlay(false);
+	XDDFChartLegend monthLegend = chart.getOrAddLegend();
+	monthLegend.setPosition(LegendPosition.BOTTOM);
+
+	XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.LEFT);
+	XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.BOTTOM);
+	leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
+
+	XDDFDataSource<String> years = XDDFDataSourcesFactory.fromArray(yearsList.toArray(new String[0]));
+	XDDFNumericalDataSource<Double> closed = XDDFDataSourcesFactory.fromArray(newSeriesList.toArray(new Double[0]));
+
+	XDDFLineChartData chartData = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
+	XDDFLineChartData.Series charSeries = (XDDFLineChartData.Series) chartData.addSeries(years, closed);
+	charSeries.setTitle("Series nuevas en los años", null);
 	chart.plot(chartData);
     }
 

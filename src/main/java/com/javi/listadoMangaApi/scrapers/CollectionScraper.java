@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CollectionScraper {
 
     public CollectionDto scrapCollectionPage(int id) throws IOException {
+	log.info("CollectionScraper inicializado");
 	String link = UrlConstants.BASE_URL + UrlConstants.PUBLISHER_COLLECTION + "?" + UrlConstants.ID_PARAM + "="
 		+ id;
 	CollectionDto collectionDto = null;

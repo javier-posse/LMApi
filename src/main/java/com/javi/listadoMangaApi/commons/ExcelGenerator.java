@@ -278,6 +278,14 @@ public class ExcelGenerator {
 	Cell celllMangaManiaCount = row13.createCell(4);
 	celllMangaManiaCount.setCellValue(conts[0]);
 
+	// Total de editoriales
+	Row row16 = sheetStatistics.getRow(16);
+	Cell cellEditorialesLabel = row16.createCell(3);
+	cellEditorialesLabel.setCellValue("Total editoriales: ");
+	cellEditorialesLabel.setCellStyle(headerStyle);
+	Cell celllEditorialesCount = row16.createCell(4);
+	celllEditorialesCount.setCellValue(sortedEditorialCounts.size());
+
 	createMonthTable(conts, sheetReleases, sheetStatistics, headerStyle, tableBodyStyle);
 	generatePastYearsReleasesTable(sheetStatistics, year, headerStyle, tableBodyStyle);
 	generatePastYearsClosedTable(sheetStatistics, year, headerStyle, tableBodyStyle);
@@ -290,9 +298,9 @@ public class ExcelGenerator {
 
     private static void generatePastYearsReleasesTable(XSSFSheet sheetStatistics, int year, CellStyle headerStyle,
 	    CellStyle tableBodyStyle) {
-	Row rowHeader = sheetStatistics.getRow(18);
+	Row rowHeader = sheetStatistics.getRow(19);
 	if (rowHeader == null) {
-	    rowHeader = sheetStatistics.createRow(18);
+	    rowHeader = sheetStatistics.createRow(19);
 	}
 	Cell cellReleasesHeaderYear = rowHeader.createCell(3);
 	cellReleasesHeaderYear.setCellValue("Año");
@@ -304,9 +312,9 @@ public class ExcelGenerator {
 	ExcelConfig config = new ExcelConfig();
 	for (int i = 1; i < 6; i++) {
 	    if (config.getProperty("year.releases." + (year - i)) != null) {
-		Row row = sheetStatistics.getRow(18 + i);
+		Row row = sheetStatistics.getRow(rowHeader.getRowNum() + i);
 		if (row == null) {
-		    row = sheetStatistics.createRow(18 + i);
+		    row = sheetStatistics.createRow(rowHeader.getRowNum() + i);
 		}
 		Cell cellReleasesYear = row.createCell(3);
 		cellReleasesYear.setCellValue(year - i);
@@ -320,9 +328,9 @@ public class ExcelGenerator {
 
     private static void generatePastYearsClosedTable(XSSFSheet sheetStatistics, int year, CellStyle headerStyle,
 	    CellStyle tableBodyStyle) {
-	Row rowHeader = sheetStatistics.getRow(28);
+	Row rowHeader = sheetStatistics.getRow(29);
 	if (rowHeader == null) {
-	    rowHeader = sheetStatistics.createRow(28);
+	    rowHeader = sheetStatistics.createRow(29);
 	}
 	Cell cellReleasesHeaderYear = rowHeader.createCell(3);
 	cellReleasesHeaderYear.setCellValue("Año");
@@ -334,9 +342,9 @@ public class ExcelGenerator {
 	ExcelConfig config = new ExcelConfig();
 	for (int i = 1; i < 6; i++) {
 	    if (config.getProperty("year.closed." + (year - i)) != null) {
-		Row row = sheetStatistics.getRow(28 + i);
+		Row row = sheetStatistics.getRow(rowHeader.getRowNum() + i);
 		if (row == null) {
-		    row = sheetStatistics.createRow(28 + i);
+		    row = sheetStatistics.createRow(rowHeader.getRowNum() + i);
 		}
 		Cell cellReleasesYear = row.createCell(3);
 		cellReleasesYear.setCellValue(year - i);
@@ -350,9 +358,9 @@ public class ExcelGenerator {
 
     private static void generatePastYearsOnlyVolumesTable(XSSFSheet sheetStatistics, int year, CellStyle headerStyle,
 	    CellStyle tableBodyStyle) {
-	Row rowHeader = sheetStatistics.getRow(38);
+	Row rowHeader = sheetStatistics.getRow(39);
 	if (rowHeader == null) {
-	    rowHeader = sheetStatistics.createRow(38);
+	    rowHeader = sheetStatistics.createRow(39);
 	}
 	Cell cellReleasesHeaderYear = rowHeader.createCell(3);
 	cellReleasesHeaderYear.setCellValue("Año");
@@ -364,9 +372,9 @@ public class ExcelGenerator {
 	ExcelConfig config = new ExcelConfig();
 	for (int i = 1; i < 6; i++) {
 	    if (config.getProperty("year.onlyVolumes." + (year - i)) != null) {
-		Row row = sheetStatistics.getRow(38 + i);
+		Row row = sheetStatistics.getRow(rowHeader.getRowNum() + i);
 		if (row == null) {
-		    row = sheetStatistics.createRow(38 + i);
+		    row = sheetStatistics.createRow(rowHeader.getRowNum() + i);
 		}
 		Cell cellReleasesYear = row.createCell(3);
 		cellReleasesYear.setCellValue(year - i);
@@ -380,9 +388,9 @@ public class ExcelGenerator {
 
     private static void generatePastYearNewSeriesTable(XSSFSheet sheetStatistics, int year, CellStyle headerStyle,
 	    CellStyle tableBodyStyle) {
-	Row rowHeader = sheetStatistics.getRow(48);
+	Row rowHeader = sheetStatistics.getRow(49);
 	if (rowHeader == null) {
-	    rowHeader = sheetStatistics.createRow(48);
+	    rowHeader = sheetStatistics.createRow(49);
 	}
 	Cell cellReleasesHeaderYear = rowHeader.createCell(3);
 	cellReleasesHeaderYear.setCellValue("Año");
@@ -394,9 +402,9 @@ public class ExcelGenerator {
 	ExcelConfig config = new ExcelConfig();
 	for (int i = 1; i < 6; i++) {
 	    if (config.getProperty("year.newSeries." + (year - i)) != null) {
-		Row row = sheetStatistics.getRow(48 + i);
+		Row row = sheetStatistics.getRow(rowHeader.getRowNum() + i);
 		if (row == null) {
-		    row = sheetStatistics.createRow(48 + i);
+		    row = sheetStatistics.createRow(rowHeader.getRowNum() + i);
 		}
 		Cell cellReleasesYear = row.createCell(3);
 		cellReleasesYear.setCellValue(year - i);
@@ -508,12 +516,12 @@ public class ExcelGenerator {
     private static void createYearReleasesChart(XSSFSheet sheetStatistics, XSSFSheet sheetCharts) {
 
 	List<String> yearsList = new ArrayList<>();
-	for (int i = 19; i <= 23; i++) {
+	for (int i = 20; i <= 24; i++) {
 	    yearsList.add(String.valueOf((int) sheetStatistics.getRow(i).getCell(3).getNumericCellValue()));
 	}
 	Collections.reverse(yearsList);
 	List<Double> releasesList = new ArrayList<>();
-	for (int i = 19; i <= 23; i++) {
+	for (int i = 20; i <= 24; i++) {
 	    releasesList.add(sheetStatistics.getRow(i).getCell(4).getNumericCellValue());
 	}
 	Collections.reverse(releasesList);
@@ -543,12 +551,12 @@ public class ExcelGenerator {
     private static void createYearClosedChart(XSSFSheet sheetStatistics, XSSFSheet sheetCharts) {
 
 	List<String> yearsList = new ArrayList<>();
-	for (int i = 29; i <= 33; i++) {
+	for (int i = 30; i <= 34; i++) {
 	    yearsList.add(String.valueOf((int) sheetStatistics.getRow(i).getCell(3).getNumericCellValue()));
 	}
 	Collections.reverse(yearsList);
 	List<Double> closedList = new ArrayList<>();
-	for (int i = 29; i <= 33; i++) {
+	for (int i = 30; i <= 34; i++) {
 	    closedList.add(sheetStatistics.getRow(i).getCell(4).getNumericCellValue());
 	}
 	Collections.reverse(closedList);
@@ -577,12 +585,12 @@ public class ExcelGenerator {
     private static void createYearOnlyVolumesChart(XSSFSheet sheetStatistics, XSSFSheet sheetCharts) {
 
 	List<String> yearsList = new ArrayList<>();
-	for (int i = 29; i <= 33; i++) {
+	for (int i = 40; i <= 44; i++) {
 	    yearsList.add(String.valueOf((int) sheetStatistics.getRow(i).getCell(3).getNumericCellValue()));
 	}
 	Collections.reverse(yearsList);
 	List<Double> onlyVolumesList = new ArrayList<>();
-	for (int i = 29; i <= 33; i++) {
+	for (int i = 40; i <= 44; i++) {
 	    onlyVolumesList.add(sheetStatistics.getRow(i).getCell(4).getNumericCellValue());
 	}
 	Collections.reverse(onlyVolumesList);
@@ -612,12 +620,12 @@ public class ExcelGenerator {
     private static void createYearNewSeriesChart(XSSFSheet sheetStatistics, XSSFSheet sheetCharts) {
 
 	List<String> yearsList = new ArrayList<>();
-	for (int i = 29; i <= 33; i++) {
+	for (int i = 50; i <= 54; i++) {
 	    yearsList.add(String.valueOf((int) sheetStatistics.getRow(i).getCell(3).getNumericCellValue()));
 	}
 	Collections.reverse(yearsList);
 	List<Double> newSeriesList = new ArrayList<>();
-	for (int i = 29; i <= 33; i++) {
+	for (int i = 50; i <= 54; i++) {
 	    newSeriesList.add(sheetStatistics.getRow(i).getCell(4).getNumericCellValue());
 	}
 	Collections.reverse(newSeriesList);

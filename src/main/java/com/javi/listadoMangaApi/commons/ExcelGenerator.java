@@ -310,18 +310,21 @@ public class ExcelGenerator {
 	cellReleasesHeaderQtty.setCellStyle(headerStyle);
 
 	ExcelConfig config = new ExcelConfig();
+	int contYears = 5;
 	for (int i = 1; i < 6; i++) {
-	    if (config.getProperty("year.releases." + (year - i)) != null) {
+	    if (config.getProperty("year.releases." + (year - contYears)) != null) {
 		Row row = sheetStatistics.getRow(rowHeader.getRowNum() + i);
 		if (row == null) {
 		    row = sheetStatistics.createRow(rowHeader.getRowNum() + i);
 		}
 		Cell cellReleasesYear = row.createCell(3);
-		cellReleasesYear.setCellValue(year - i);
+		cellReleasesYear.setCellValue(year - contYears);
 		cellReleasesYear.setCellStyle(tableBodyStyle);
 		Cell cellReleasesQtty = row.createCell(4);
-		cellReleasesQtty.setCellValue(Integer.valueOf(config.getProperty("year.releases." + (year - i))));
+		cellReleasesQtty
+			.setCellValue(Integer.valueOf(config.getProperty("year.releases." + (year - contYears))));
 		cellReleasesQtty.setCellStyle(tableBodyStyle);
+		contYears--;
 	    }
 	}
     }
@@ -340,18 +343,20 @@ public class ExcelGenerator {
 	cellReleasesHeaderQtty.setCellStyle(headerStyle);
 
 	ExcelConfig config = new ExcelConfig();
+	int contYears = 5;
 	for (int i = 1; i < 6; i++) {
-	    if (config.getProperty("year.closed." + (year - i)) != null) {
+	    if (config.getProperty("year.closed." + (year - contYears)) != null) {
 		Row row = sheetStatistics.getRow(rowHeader.getRowNum() + i);
 		if (row == null) {
 		    row = sheetStatistics.createRow(rowHeader.getRowNum() + i);
 		}
 		Cell cellReleasesYear = row.createCell(3);
-		cellReleasesYear.setCellValue(year - i);
+		cellReleasesYear.setCellValue(year - contYears);
 		cellReleasesYear.setCellStyle(tableBodyStyle);
 		Cell cellReleasesQtty = row.createCell(4);
-		cellReleasesQtty.setCellValue(Integer.valueOf(config.getProperty("year.closed." + (year - i))));
+		cellReleasesQtty.setCellValue(Integer.valueOf(config.getProperty("year.closed." + (year - contYears))));
 		cellReleasesQtty.setCellStyle(tableBodyStyle);
+		contYears--;
 	    }
 	}
     }
@@ -370,18 +375,21 @@ public class ExcelGenerator {
 	cellReleasesHeaderQtty.setCellStyle(headerStyle);
 
 	ExcelConfig config = new ExcelConfig();
+	int contYears = 5;
 	for (int i = 1; i < 6; i++) {
-	    if (config.getProperty("year.onlyVolumes." + (year - i)) != null) {
+	    if (config.getProperty("year.onlyVolumes." + (year - contYears)) != null) {
 		Row row = sheetStatistics.getRow(rowHeader.getRowNum() + i);
 		if (row == null) {
 		    row = sheetStatistics.createRow(rowHeader.getRowNum() + i);
 		}
 		Cell cellReleasesYear = row.createCell(3);
-		cellReleasesYear.setCellValue(year - i);
+		cellReleasesYear.setCellValue(year - contYears);
 		cellReleasesYear.setCellStyle(tableBodyStyle);
 		Cell cellReleasesQtty = row.createCell(4);
-		cellReleasesQtty.setCellValue(Integer.valueOf(config.getProperty("year.onlyVolumes." + (year - i))));
+		cellReleasesQtty
+			.setCellValue(Integer.valueOf(config.getProperty("year.onlyVolumes." + (year - contYears))));
 		cellReleasesQtty.setCellStyle(tableBodyStyle);
+		contYears--;
 	    }
 	}
     }
@@ -400,18 +408,21 @@ public class ExcelGenerator {
 	cellReleasesHeaderQtty.setCellStyle(headerStyle);
 
 	ExcelConfig config = new ExcelConfig();
+	int contYears = 5;
 	for (int i = 1; i < 6; i++) {
-	    if (config.getProperty("year.newSeries." + (year - i)) != null) {
+	    if (config.getProperty("year.newSeries." + (year - contYears)) != null) {
 		Row row = sheetStatistics.getRow(rowHeader.getRowNum() + i);
 		if (row == null) {
 		    row = sheetStatistics.createRow(rowHeader.getRowNum() + i);
 		}
 		Cell cellReleasesYear = row.createCell(3);
-		cellReleasesYear.setCellValue(year - i);
+		cellReleasesYear.setCellValue(year - contYears);
 		cellReleasesYear.setCellStyle(tableBodyStyle);
 		Cell cellReleasesQtty = row.createCell(4);
-		cellReleasesQtty.setCellValue(Integer.valueOf(config.getProperty("year.newSeries." + (year - i))));
+		cellReleasesQtty
+			.setCellValue(Integer.valueOf(config.getProperty("year.newSeries." + (year - contYears))));
 		cellReleasesQtty.setCellStyle(tableBodyStyle);
+		contYears--;
 	    }
 	}
     }
@@ -443,9 +454,9 @@ public class ExcelGenerator {
 	legend.setPosition(LegendPosition.RIGHT);
 
 	XDDFDataSource<String> categories = XDDFDataSourcesFactory.fromStringCellRange(sheetStatistics,
-		new CellRangeAddress(4, conts[1] - 1, 0, 0));
+		new CellRangeAddress(1, conts[1] > 10 ? 10 : conts[1] - 1, 0, 0));
 	XDDFNumericalDataSource<Double> values = XDDFDataSourcesFactory.fromNumericCellRange(sheetStatistics,
-		new CellRangeAddress(4, conts[1] - 1, 1, 1));
+		new CellRangeAddress(1, conts[1] > 10 ? 10 : conts[1] - 1, 1, 1));
 	XDDFPieChartData data = (XDDFPieChartData) pieChart.createData(ChartTypes.PIE, null, null);
 	XDDFPieChartData.Series series = (XDDFPieChartData.Series) data.addSeries(categories, values);
 	series.setTitle("Editoriales", null);
@@ -537,10 +548,12 @@ public class ExcelGenerator {
 	XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.LEFT);
 	XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.BOTTOM);
 	leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
+	leftAxis.setNumberFormat("#,##0.00");
 
-	XDDFDataSource<String> years = XDDFDataSourcesFactory.fromArray(yearsList.toArray(new String[0]));
-	XDDFNumericalDataSource<Double> releases = XDDFDataSourcesFactory
-		.fromArray(releasesList.toArray(new Double[0]));
+	XDDFDataSource<String> years = XDDFDataSourcesFactory.fromStringCellRange(sheetStatistics,
+		new CellRangeAddress(19, 23, 3, 3));
+	XDDFNumericalDataSource<Double> releases = XDDFDataSourcesFactory.fromNumericCellRange(sheetStatistics,
+		new CellRangeAddress(19, 23, 4, 4));
 
 	XDDFLineChartData chartData = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
 	XDDFLineChartData.Series charSeries = (XDDFLineChartData.Series) chartData.addSeries(years, releases);
@@ -573,8 +586,10 @@ public class ExcelGenerator {
 	XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.BOTTOM);
 	leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
 
-	XDDFDataSource<String> years = XDDFDataSourcesFactory.fromArray(yearsList.toArray(new String[0]));
-	XDDFNumericalDataSource<Double> closed = XDDFDataSourcesFactory.fromArray(closedList.toArray(new Double[0]));
+	XDDFDataSource<String> years = XDDFDataSourcesFactory.fromStringCellRange(sheetStatistics,
+		new CellRangeAddress(29, 33, 3, 3));
+	XDDFNumericalDataSource<Double> closed = XDDFDataSourcesFactory.fromNumericCellRange(sheetStatistics,
+		new CellRangeAddress(29, 33, 4, 4));
 
 	XDDFLineChartData chartData = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
 	XDDFLineChartData.Series charSeries = (XDDFLineChartData.Series) chartData.addSeries(years, closed);
@@ -607,9 +622,10 @@ public class ExcelGenerator {
 	XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.BOTTOM);
 	leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
 
-	XDDFDataSource<String> years = XDDFDataSourcesFactory.fromArray(yearsList.toArray(new String[0]));
-	XDDFNumericalDataSource<Double> closed = XDDFDataSourcesFactory
-		.fromArray(onlyVolumesList.toArray(new Double[0]));
+	XDDFDataSource<String> years = XDDFDataSourcesFactory.fromStringCellRange(sheetStatistics,
+		new CellRangeAddress(39, 43, 3, 3));
+	XDDFNumericalDataSource<Double> closed = XDDFDataSourcesFactory.fromNumericCellRange(sheetStatistics,
+		new CellRangeAddress(39, 43, 4, 4));
 
 	XDDFLineChartData chartData = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
 	XDDFLineChartData.Series charSeries = (XDDFLineChartData.Series) chartData.addSeries(years, closed);
@@ -642,8 +658,10 @@ public class ExcelGenerator {
 	XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.BOTTOM);
 	leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
 
-	XDDFDataSource<String> years = XDDFDataSourcesFactory.fromArray(yearsList.toArray(new String[0]));
-	XDDFNumericalDataSource<Double> closed = XDDFDataSourcesFactory.fromArray(newSeriesList.toArray(new Double[0]));
+	XDDFDataSource<String> years = XDDFDataSourcesFactory.fromStringCellRange(sheetStatistics,
+		new CellRangeAddress(49, 53, 3, 3));
+	XDDFNumericalDataSource<Double> closed = XDDFDataSourcesFactory.fromNumericCellRange(sheetStatistics,
+		new CellRangeAddress(49, 53, 4, 4));
 
 	XDDFLineChartData chartData = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
 	XDDFLineChartData.Series charSeries = (XDDFLineChartData.Series) chartData.addSeries(years, closed);

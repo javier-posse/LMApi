@@ -518,9 +518,9 @@ public class ExcelGenerator {
 	leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
 
 	XDDFDataSource<String> years = XDDFDataSourcesFactory.fromStringCellRange(sheetStatistics,
-		new CellRangeAddress(19, 23, 3, 3));
+		new CellRangeAddress(20, 24, 3, 3));
 	XDDFNumericalDataSource<Double> releases = XDDFDataSourcesFactory.fromNumericCellRange(sheetStatistics,
-		new CellRangeAddress(19, 23, 4, 4));
+		new CellRangeAddress(20, 24, 4, 4));
 
 	XDDFLineChartData chartData = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
 	chartData.addSeries(years, releases).setTitle("Novedades en los años", null);
@@ -541,9 +541,9 @@ public class ExcelGenerator {
 	leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
 
 	XDDFDataSource<String> years = XDDFDataSourcesFactory.fromStringCellRange(sheetStatistics,
-		new CellRangeAddress(29, 33, 3, 3));
+		new CellRangeAddress(30, 34, 3, 3));
 	XDDFNumericalDataSource<Double> closed = XDDFDataSourcesFactory.fromNumericCellRange(sheetStatistics,
-		new CellRangeAddress(29, 33, 4, 4));
+		new CellRangeAddress(30, 34, 4, 4));
 
 	XDDFLineChartData chartData = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
 	chartData.addSeries(years, closed).setTitle("Series cerradas en los años", null);
@@ -564,9 +564,9 @@ public class ExcelGenerator {
 	leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
 
 	XDDFDataSource<String> years = XDDFDataSourcesFactory.fromStringCellRange(sheetStatistics,
-		new CellRangeAddress(39, 43, 3, 3));
+		new CellRangeAddress(40, 44, 3, 3));
 	XDDFNumericalDataSource<Double> closed = XDDFDataSourcesFactory.fromNumericCellRange(sheetStatistics,
-		new CellRangeAddress(39, 43, 4, 4));
+		new CellRangeAddress(40, 44, 4, 4));
 
 	XDDFLineChartData chartData = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
 	chartData.addSeries(years, closed).setTitle("Tomos únicos en los años", null);
@@ -587,9 +587,9 @@ public class ExcelGenerator {
 	leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
 
 	XDDFDataSource<String> years = XDDFDataSourcesFactory.fromStringCellRange(sheetStatistics,
-		new CellRangeAddress(49, 53, 3, 3));
+		new CellRangeAddress(50, 54, 3, 3));
 	XDDFNumericalDataSource<Double> closed = XDDFDataSourcesFactory.fromNumericCellRange(sheetStatistics,
-		new CellRangeAddress(49, 53, 4, 4));
+		new CellRangeAddress(50, 54, 4, 4));
 
 	XDDFLineChartData chartData = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
 	chartData.addSeries(years, closed).setTitle("Series nuevas en los años", null);

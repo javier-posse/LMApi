@@ -33,17 +33,20 @@ public class ListadoMangaApiService {
     JpPublisherScraper jpPublisherScraper;
     SeriesScraper seriesScraper;
     MonthReleasesScraper monthReleasesScraper;
+    ExcelGenerator excelGenerator;
     ExceptionFactory exceptionFactory;
 
     public ListadoMangaApiService(AuthorScraper authorScraper, CollectionScraper collectionScraper,
 	    SpPublisherScrapper publisherScrapper, JpPublisherScraper jpPublisherScraper, SeriesScraper seriesScraper,
-	    MonthReleasesScraper monthReleasesScraper, ExceptionFactory exceptionFactory) {
+	    MonthReleasesScraper monthReleasesScraper, ExcelGenerator excelGenerator,
+	    ExceptionFactory exceptionFactory) {
 	this.authorScraper = authorScraper;
 	this.collectionScraper = collectionScraper;
 	this.publisherScrapper = publisherScrapper;
 	this.jpPublisherScraper = jpPublisherScraper;
 	this.seriesScraper = seriesScraper;
 	this.monthReleasesScraper = monthReleasesScraper;
+	this.excelGenerator = excelGenerator;
 	this.exceptionFactory = exceptionFactory;
     }
 
@@ -116,7 +119,7 @@ public class ListadoMangaApiService {
 	}
 	if (generateExcel) {
 	    try {
-		ExcelGenerator.generateExcelReleases(year, yearReleases.getSeriesReleases(), lastVolumeCount);
+		excelGenerator.generateExcelReleases(year, yearReleases.getSeriesReleases(), lastVolumeCount);
 	    } catch (IOException e) {
 		throw exceptionFactory.createExcelException(e);
 	    }

@@ -8,8 +8,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -57,6 +59,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
 
 import com.javi.listadoMangaApi.config.ExcelConfig;
+import com.javi.listadoMangaApi.constants.ExcelConstants;
 import com.javi.listadoMangaApi.constants.UrlConstants;
 import com.javi.listadoMangaApi.dto.SeriesReleaseDto;
 
@@ -65,7 +68,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 public class ExcelGenerator {
-    // constructor privado para que no se genere el público default
     private ExcelGenerator() {
     }
 
@@ -74,12 +76,12 @@ public class ExcelGenerator {
 
 	log.info("ExcelGenerator inicializado");
 
-	// Genero lo necesario para guardar el fichero
-	Path path = Paths.get("./Excel");
+	//Excel File
+	Path path = Paths.get(ExcelConstants.FILEPATH);
 	Files.createDirectories(path);
-	DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd%HH-mm-ss");
-	String fileLocation = path.toString() + File.separator + year + "_releases_"
-		+ Instant.now().atZone(ZoneId.of("Europe/Madrid")).format(dateFormat) + ".xlsx";
+	DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern(ExcelConstants.DATETIME_FORMAT_FILE_NAME);
+	String fileLocation = path.toString() + File.separator + year + ExcelConstants.RELEASES
+		+ Instant.now().atZone(ZoneId.of(ExcelConstants.MADRID_DATETIME)).format(dateFormat) + ExcelConstants.FILE_EXTENSION;
 
 	XSSFWorkbook excel = new XSSFWorkbook();
 	int[] conts = { 0, 0, 0 };
@@ -89,7 +91,6 @@ public class ExcelGenerator {
 	generateSecondSheet(excel, conts, seriesReleases, headerStyle, tableBodyStyle, lastVolumeCount, year);
 	generateThirdSheet(excel, conts);
 
-	// cierre y guardado del fichero
 	FileOutputStream outputStream;
 	outputStream = new FileOutputStream(fileLocation);
 	excel.write(outputStream);
@@ -101,7 +102,7 @@ public class ExcelGenerator {
 
     private XSSFSheet generateFirstSheet(XSSFWorkbook excel, int[] contMangaMania,
 	    List<SeriesReleaseDto> seriesReleases, CellStyle headerStyle, CellStyle tableBodyStyle) {
-	XSSFSheet sheetReleases = excel.createSheet("Lanzamientos");
+	XSSFSheet sheetReleases = excel.createSheet(ExcelConstants.FIRST_SHEET_NAME);
 	sheetReleases.setColumnWidth(0, 17000);
 	sheetReleases.setColumnWidth(1, 10000);
 	sheetReleases.setColumnWidth(2, 10000);
@@ -109,32 +110,26 @@ public class ExcelGenerator {
 
 	// Headers de la tabla y sus estilo
 	Row header = sheetReleases.createRow(0);
-
 	Cell headerCell = header.createCell(0);
-	headerCell.setCellValue("Nombre");
+	headerCell.setCellValue(ExcelConstants.TABLE_COLUMN_NAME_LABEL);
 	headerCell.setCellStyle(headerStyle);
-
 	headerCell = header.createCell(1);
-	headerCell.setCellValue("Fecha");
+	headerCell.setCellValue(ExcelConstants.TABLE_COLUMN_DATE_LABEL);
 	headerCell.setCellStyle(headerStyle);
-
 	headerCell = header.createCell(2);
-	headerCell.setCellValue("Editorial");
+	headerCell.setCellValue(ExcelConstants.TABLE_COLUMN_PUBLISHER_LABEL);
 	headerCell.setCellStyle(headerStyle);
-
 	headerCell = header.createCell(3);
-	headerCell.setCellValue("Tipo");
+	headerCell.setCellValue(ExcelConstants.TABLE_COLUMN_TYPE_LABEL);
 	headerCell.setCellStyle(headerStyle);
 
-	// Estilo de fechas
 	CellStyle cellStyleDate = createDatesStyle(excel);
 
-	// Validaciones para crear el drop-down
-	String[] options = { "Tomo único", "Primer tomo", "Último tomo" };
+	String[] options = { ExcelConstants.TABLE_TYPE_DROPDOWN_ONLY_VOLUME, ExcelConstants.TABLE_TYPE_DROPDOWN_FIRST_VOLUME, ExcelConstants.TABLE_TYPE_DROPDOWN_LAST_VOLUME };
 
 	DataValidationHelper validationHelper = new XSSFDataValidationHelper(sheetReleases);
 	DataValidationConstraint constraint = validationHelper.createExplicitListConstraint(options);
-	CellRangeAddressList addressList = new CellRangeAddressList(1, seriesReleases.size(), 3, 3);
+	CellRangeAddressList addressList = new CellRangeAddressList(1, seriesReleases.size(), ExcelConstants.Cell.THIRD, ExcelConstants.Cell.THIRD);
 	DataValidation validation = validationHelper.createValidation(constraint, addressList);
 
 	sheetReleases.addValidationData(validation);
@@ -143,29 +138,29 @@ public class ExcelGenerator {
 
 	    Row row = sheetReleases.createRow(i + 1);
 
-	    Cell cell = row.createCell(0);
+	    Cell cell = row.createCell(ExcelConstants.Cell.ZERO);
 	    cell.setCellValue(seriesReleases.get(i).getName());
 	    Hyperlink link = excel.getCreationHelper().createHyperlink(HyperlinkType.URL);
 	    link.setAddress(CommonUtils.getLinkFromId(seriesReleases.get(i).getId(), UrlConstants.SERIES_PATH));
 	    cell.setHyperlink(link);
 
-	    if (seriesReleases.get(i).getName().contains("Manía")
-		    && seriesReleases.get(i).getPublisherName().equals("Planeta Cómic")) {
+	    if (seriesReleases.get(i).getName().contains(ExcelConstants.MANIA)
+		    && seriesReleases.get(i).getPublisherName().equals(ExcelConstants.PLANETA)) {
 		contMangaMania[0]++;
 	    }
 	    cell.setCellStyle(tableBodyStyle);
 
-	    cell = row.createCell(1);
+	    cell = row.createCell(ExcelConstants.Cell.FIRST);
 	    // Convierto la fecha a formato fecha de Java
 	    String releaseDate = seriesReleases.get(i).getReleaseDate();
 	    cell.setCellValue(CommonUtils.fullDateConverter(releaseDate));
 	    cell.setCellStyle(cellStyleDate);
 
-	    cell = row.createCell(2);
+	    cell = row.createCell(ExcelConstants.Cell.SECOND);
 	    cell.setCellValue(seriesReleases.get(i).getPublisherName());
 	    cell.setCellStyle(tableBodyStyle);
 
-	    cell = row.createCell(3);
+	    cell = row.createCell(ExcelConstants.Cell.THIRD);
 	    if (seriesReleases.get(i).isOnlyVolume()) {
 		cell.setCellValue(options[0]);
 	    } else if (seriesReleases.get(i).isFirstRelease()) {
@@ -176,8 +171,7 @@ public class ExcelGenerator {
 	    cell.setCellStyle(tableBodyStyle);
 	}
 
-	// filtros de tabla
-	sheetReleases.setAutoFilter(new CellRangeAddress(0, seriesReleases.size(), 1, 3));
+	sheetReleases.setAutoFilter(new CellRangeAddress(0, seriesReleases.size(), ExcelConstants.Cell.FIRST, ExcelConstants.Cell.FIRST));
 
 	return sheetReleases;
     }
@@ -186,19 +180,19 @@ public class ExcelGenerator {
 	    CellStyle headerStyle, CellStyle tableBodyStyle, int lastVolumeCount, int year) {
 	XSSFSheet sheetReleases = excel.getSheetAt(0);
 	// Generado hoja de estadisticas
-	XSSFSheet sheetStatistics = excel.createSheet("Estadísticas");
-	sheetStatistics.setColumnWidth(0, 15000);
-	sheetStatistics.setColumnWidth(1, 10000);
-	sheetStatistics.setColumnWidth(2, 10000);
-	sheetStatistics.setColumnWidth(3, 10000);
-	sheetStatistics.setColumnWidth(4, 10000);
-	sheetStatistics.setColumnWidth(5, 10000);
+	XSSFSheet sheetStatistics = excel.createSheet(ExcelConstants.SECOND_SHEET_NAME);
+	sheetStatistics.setColumnWidth(ExcelConstants.Cell.ZERO, 15000);
+	sheetStatistics.setColumnWidth(ExcelConstants.Cell.FIRST, 10000);
+	sheetStatistics.setColumnWidth(ExcelConstants.Cell.SECOND, 10000);
+	sheetStatistics.setColumnWidth(ExcelConstants.Cell.THIRD, 10000);
+	sheetStatistics.setColumnWidth(ExcelConstants.Cell.FOURTH, 10000);
+	sheetStatistics.setColumnWidth(ExcelConstants.Cell.FIFTH, 10000);
 
 	// tabla de editoriales
 	// Contar las apariciones de cada editorial en el primer sheet
 	Map<String, Integer> publisherCounts = new HashMap<>();
 	for (Row rowPublishers : sheetReleases) {
-	    Cell cell = rowPublishers.getCell(2);
+	    Cell cell = rowPublishers.getCell(ExcelConstants.Cell.SECOND);
 	    if (cell != null && cell.getCellType() == CellType.STRING) {
 		String publisher = cell.getStringCellValue();
 		publisherCounts.put(publisher, publisherCounts.getOrDefault(publisher, 0) + 1);
@@ -209,17 +203,17 @@ public class ExcelGenerator {
 	sortedEditorialCounts.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()));
 	// Colocar en el sheet las editoriales
 	Row headerRow = sheetStatistics.createRow(conts[1]++);
-	headerRow.createCell(0).setCellValue("Nombre editorial");
-	headerRow.createCell(1).setCellValue("Cantidad de lanzamientos");
-	headerRow.getCell(0).setCellStyle(headerStyle);
-	headerRow.getCell(1).setCellStyle(headerStyle);
+	headerRow.createCell(ExcelConstants.Cell.ZERO).setCellValue(ExcelConstants.TABLE_COLUMN_PUBLISHER_NAME_LABEL);
+	headerRow.createCell(ExcelConstants.Cell.FIRST).setCellValue(ExcelConstants.TABLE_COLUMN_NEW_RELEASES_QUANTITY_LABEL);
+	headerRow.getCell(ExcelConstants.Cell.ZERO).setCellStyle(headerStyle);
+	headerRow.getCell(ExcelConstants.Cell.FIRST).setCellStyle(headerStyle);
 
 	for (Map.Entry<String, Integer> entry : sortedEditorialCounts) {
 	    Row rowPublishersTable = sheetStatistics.createRow(conts[1]++);
-	    rowPublishersTable.createCell(0).setCellValue(entry.getKey());
-	    rowPublishersTable.createCell(1).setCellValue(entry.getValue());
-	    rowPublishersTable.getCell(0).setCellStyle(tableBodyStyle);
-	    rowPublishersTable.getCell(1).setCellStyle(tableBodyStyle);
+	    rowPublishersTable.createCell(ExcelConstants.Cell.ZERO).setCellValue(entry.getKey());
+	    rowPublishersTable.createCell(ExcelConstants.Cell.FIRST).setCellValue(entry.getValue());
+	    rowPublishersTable.getCell(ExcelConstants.Cell.ZERO).setCellStyle(tableBodyStyle);
+	    rowPublishersTable.getCell(ExcelConstants.Cell.FIRST).setCellStyle(tableBodyStyle);
 	}
 	// total de tomos unicos y primeros tomos
 	int onlyVolumeCont = 0;
@@ -233,45 +227,45 @@ public class ExcelGenerator {
 	    }
 	}
 	// total de lanzamientos
-	Cell cellReleasesLabel = sheetStatistics.getRow(1).createCell(3);
-	cellReleasesLabel.setCellValue("Total lanzamientos: ");
+	Cell cellReleasesLabel = sheetStatistics.getRow(1).createCell(ExcelConstants.Cell.THIRD);
+	cellReleasesLabel.setCellValue(ExcelConstants.CELL_TOTAL_RELEASES_LABEL);
 	cellReleasesLabel.setCellStyle(headerStyle);
-	Cell cellReleasesCount = sheetStatistics.getRow(1).createCell(4);
+	Cell cellReleasesCount = sheetStatistics.getRow(1).createCell(ExcelConstants.Cell.FOURTH);
 	cellReleasesCount.setCellValue(seriesReleases.size());
 
 	// Total de tomos únicos
-	Cell cellOnlyVolumeLabel = sheetStatistics.getRow(4).createCell(3);
-	cellOnlyVolumeLabel.setCellValue("Total tomos únicos: ");
+	Cell cellOnlyVolumeLabel = sheetStatistics.getRow(4).createCell(ExcelConstants.Cell.THIRD);
+	cellOnlyVolumeLabel.setCellValue(ExcelConstants.CELL_TOTAL_ONLY_VOLUMES_LABEL);
 	cellOnlyVolumeLabel.setCellStyle(headerStyle);
-	Cell cellOnlyVolumeCount = sheetStatistics.getRow(4).createCell(4);
+	Cell cellOnlyVolumeCount = sheetStatistics.getRow(4).createCell(ExcelConstants.Cell.FOURTH);
 	cellOnlyVolumeCount.setCellValue(onlyVolumeCont);
 
 	// Total de primeros tomos
-	Cell cellFirstVolumeLabel = sheetStatistics.getRow(7).createCell(3);
-	cellFirstVolumeLabel.setCellValue("Total nuevas series: ");
+	Cell cellFirstVolumeLabel = sheetStatistics.getRow(7).createCell(ExcelConstants.Cell.THIRD);
+	cellFirstVolumeLabel.setCellValue(ExcelConstants.CELL_TOTAL_NEW_SERIES_LABEL);
 	cellFirstVolumeLabel.setCellStyle(headerStyle);
-	Cell cellFirstVolumeCount = sheetStatistics.getRow(7).createCell(4);
+	Cell cellFirstVolumeCount = sheetStatistics.getRow(7).createCell(ExcelConstants.Cell.FOURTH);
 	cellFirstVolumeCount.setCellValue(firstVolumeCont);
 
 	// Total de terminadas
-	Cell cellLastVolumeLabel = sheetStatistics.getRow(10).createCell(3);
-	cellLastVolumeLabel.setCellValue("Total series terminadas: ");
+	Cell cellLastVolumeLabel = sheetStatistics.getRow(10).createCell(ExcelConstants.Cell.THIRD);
+	cellLastVolumeLabel.setCellValue(ExcelConstants.CELL_TOTAL_LAST_VOLUMES_LABEL);
 	cellLastVolumeLabel.setCellStyle(headerStyle);
-	Cell cellLastVolumeCount = sheetStatistics.getRow(10).createCell(4);
+	Cell cellLastVolumeCount = sheetStatistics.getRow(10).createCell(ExcelConstants.Cell.FOURTH);
 	cellLastVolumeCount.setCellValue(lastVolumeCount);
 
 	// Total de manga manía
-	Cell cellMangaManiaLabel = sheetStatistics.getRow(13).createCell(3);
-	cellMangaManiaLabel.setCellValue("Total \"Manga Manía\": ");
+	Cell cellMangaManiaLabel = sheetStatistics.getRow(13).createCell(ExcelConstants.Cell.THIRD);
+	cellMangaManiaLabel.setCellValue(ExcelConstants.CELL_TOTAL_MANGA_MANIA_LABEL);
 	cellMangaManiaLabel.setCellStyle(headerStyle);
-	Cell celllMangaManiaCount = sheetStatistics.getRow(13).createCell(4);
+	Cell celllMangaManiaCount = sheetStatistics.getRow(13).createCell(ExcelConstants.Cell.FOURTH);
 	celllMangaManiaCount.setCellValue(conts[0]);
 
 	// Total de editoriales
-	Cell cellEditorialesLabel = sheetStatistics.getRow(16).createCell(3);
-	cellEditorialesLabel.setCellValue("Total editoriales: ");
+	Cell cellEditorialesLabel = sheetStatistics.getRow(16).createCell(ExcelConstants.Cell.THIRD);
+	cellEditorialesLabel.setCellValue(ExcelConstants.CELL_TOTAL_PUBLISHERS_LABEL);
 	cellEditorialesLabel.setCellStyle(headerStyle);
-	Cell celllEditorialesCount = sheetStatistics.getRow(16).createCell(4);
+	Cell celllEditorialesCount = sheetStatistics.getRow(16).createCell(ExcelConstants.Cell.FOURTH);
 	celllEditorialesCount.setCellValue(sortedEditorialCounts.size());
 
 	createMonthTable(conts, sheetReleases, sheetStatistics, headerStyle, tableBodyStyle);
@@ -290,27 +284,27 @@ public class ExcelGenerator {
 	if (rowHeader == null) {
 	    rowHeader = sheetStatistics.createRow(19);
 	}
-	Cell cellReleasesHeaderYear = rowHeader.createCell(3);
-	cellReleasesHeaderYear.setCellValue("Año");
+	Cell cellReleasesHeaderYear = rowHeader.createCell(ExcelConstants.Cell.THIRD);
+	cellReleasesHeaderYear.setCellValue(ExcelConstants.TABLE_COLUMN_YEAR_LABEL);
 	cellReleasesHeaderYear.setCellStyle(headerStyle);
-	Cell cellReleasesHeaderQtty = rowHeader.createCell(4);
-	cellReleasesHeaderQtty.setCellValue("Novedades");
+	Cell cellReleasesHeaderQtty = rowHeader.createCell(ExcelConstants.Cell.FOURTH);
+	cellReleasesHeaderQtty.setCellValue(ExcelConstants.TABLE_COLUMN_NEWS_LABEL);
 	cellReleasesHeaderQtty.setCellStyle(headerStyle);
 
 	ExcelConfig config = new ExcelConfig();
 	int contYears = 5;
 	for (int i = 1; i < 6; i++) {
-	    if (config.getProperty("year.releases." + (year - contYears)) != null) {
+	    if (config.getProperty(ExcelConstants.EXCEL_PROPERTY_YEAR_RELEASES + (year - contYears)) != null) {
 		Row row = sheetStatistics.getRow(rowHeader.getRowNum() + i);
 		if (row == null) {
 		    row = sheetStatistics.createRow(rowHeader.getRowNum() + i);
 		}
-		Cell cellReleasesYear = row.createCell(3);
+		Cell cellReleasesYear = row.createCell(ExcelConstants.Cell.THIRD);
 		cellReleasesYear.setCellValue(year - contYears);
 		cellReleasesYear.setCellStyle(tableBodyStyle);
-		Cell cellReleasesQtty = row.createCell(4);
+		Cell cellReleasesQtty = row.createCell(ExcelConstants.Cell.FOURTH);
 		cellReleasesQtty
-			.setCellValue(Integer.valueOf(config.getProperty("year.releases." + (year - contYears))));
+			.setCellValue(Integer.valueOf(config.getProperty(ExcelConstants.EXCEL_PROPERTY_YEAR_RELEASES + (year - contYears))));
 		cellReleasesQtty.setCellStyle(tableBodyStyle);
 		contYears--;
 	    }
@@ -319,30 +313,30 @@ public class ExcelGenerator {
 
     private void generatePastYearsClosedTable(XSSFSheet sheetStatistics, int year, CellStyle headerStyle,
 	    CellStyle tableBodyStyle) {
-	Row rowHeader = sheetStatistics.getRow(29);
+	Row rowHeader = sheetStatistics.getRow(ExcelConstants.Cell.CLOSED_SERIES);
 	if (rowHeader == null) {
-	    rowHeader = sheetStatistics.createRow(29);
+	    rowHeader = sheetStatistics.createRow(ExcelConstants.Cell.CLOSED_SERIES);
 	}
-	Cell cellReleasesHeaderYear = rowHeader.createCell(3);
-	cellReleasesHeaderYear.setCellValue("Año");
+	Cell cellReleasesHeaderYear = rowHeader.createCell(ExcelConstants.Cell.THIRD);
+	cellReleasesHeaderYear.setCellValue(ExcelConstants.TABLE_COLUMN_YEAR_LABEL);
 	cellReleasesHeaderYear.setCellStyle(headerStyle);
-	Cell cellReleasesHeaderQtty = rowHeader.createCell(4);
-	cellReleasesHeaderQtty.setCellValue("Series cerradas");
+	Cell cellReleasesHeaderQtty = rowHeader.createCell(ExcelConstants.Cell.FOURTH);
+	cellReleasesHeaderQtty.setCellValue(ExcelConstants.TABLE_COLUMN_CLOSED_LABEL);
 	cellReleasesHeaderQtty.setCellStyle(headerStyle);
 
 	ExcelConfig config = new ExcelConfig();
 	int contYears = 5;
 	for (int i = 1; i < 6; i++) {
-	    if (config.getProperty("year.closed." + (year - contYears)) != null) {
+	    if (config.getProperty(ExcelConstants.EXCEL_PROPERTY_YEAR_CLOSED + (year - contYears)) != null) {
 		Row row = sheetStatistics.getRow(rowHeader.getRowNum() + i);
 		if (row == null) {
 		    row = sheetStatistics.createRow(rowHeader.getRowNum() + i);
 		}
-		Cell cellReleasesYear = row.createCell(3);
+		Cell cellReleasesYear = row.createCell(ExcelConstants.Cell.THIRD);
 		cellReleasesYear.setCellValue(year - contYears);
 		cellReleasesYear.setCellStyle(tableBodyStyle);
-		Cell cellReleasesQtty = row.createCell(4);
-		cellReleasesQtty.setCellValue(Integer.valueOf(config.getProperty("year.closed." + (year - contYears))));
+		Cell cellReleasesQtty = row.createCell(ExcelConstants.Cell.FOURTH);
+		cellReleasesQtty.setCellValue(Integer.valueOf(config.getProperty(ExcelConstants.EXCEL_PROPERTY_YEAR_CLOSED + (year - contYears))));
 		cellReleasesQtty.setCellStyle(tableBodyStyle);
 		contYears--;
 	    }
@@ -351,31 +345,31 @@ public class ExcelGenerator {
 
     private void generatePastYearsOnlyVolumesTable(XSSFSheet sheetStatistics, int year, CellStyle headerStyle,
 	    CellStyle tableBodyStyle) {
-	Row rowHeader = sheetStatistics.getRow(39);
+	Row rowHeader = sheetStatistics.getRow(ExcelConstants.Cell.ONLY_VOLUMES);
 	if (rowHeader == null) {
-	    rowHeader = sheetStatistics.createRow(39);
+	    rowHeader = sheetStatistics.createRow(ExcelConstants.Cell.ONLY_VOLUMES);
 	}
-	Cell cellReleasesHeaderYear = rowHeader.createCell(3);
-	cellReleasesHeaderYear.setCellValue("Año");
+	Cell cellReleasesHeaderYear = rowHeader.createCell(ExcelConstants.Cell.THIRD);
+	cellReleasesHeaderYear.setCellValue(ExcelConstants.TABLE_COLUMN_YEAR_LABEL);
 	cellReleasesHeaderYear.setCellStyle(headerStyle);
-	Cell cellReleasesHeaderQtty = rowHeader.createCell(4);
-	cellReleasesHeaderQtty.setCellValue("Tomos únicos");
+	Cell cellReleasesHeaderQtty = rowHeader.createCell(ExcelConstants.Cell.FOURTH);
+	cellReleasesHeaderQtty.setCellValue(ExcelConstants.TABLE_COLUMN_ONLY_VOLUMES_LABEL);
 	cellReleasesHeaderQtty.setCellStyle(headerStyle);
 
 	ExcelConfig config = new ExcelConfig();
 	int contYears = 5;
 	for (int i = 1; i < 6; i++) {
-	    if (config.getProperty("year.onlyVolumes." + (year - contYears)) != null) {
+	    if (config.getProperty(ExcelConstants.EXCEL_PROPERTY_YEAR_ONLY_VOLUMES + (year - contYears)) != null) {
 		Row row = sheetStatistics.getRow(rowHeader.getRowNum() + i);
 		if (row == null) {
 		    row = sheetStatistics.createRow(rowHeader.getRowNum() + i);
 		}
-		Cell cellReleasesYear = row.createCell(3);
+		Cell cellReleasesYear = row.createCell(ExcelConstants.Cell.THIRD);
 		cellReleasesYear.setCellValue(year - contYears);
 		cellReleasesYear.setCellStyle(tableBodyStyle);
-		Cell cellReleasesQtty = row.createCell(4);
+		Cell cellReleasesQtty = row.createCell(ExcelConstants.Cell.FOURTH);
 		cellReleasesQtty
-			.setCellValue(Integer.valueOf(config.getProperty("year.onlyVolumes." + (year - contYears))));
+			.setCellValue(Integer.valueOf(config.getProperty(ExcelConstants.EXCEL_PROPERTY_YEAR_ONLY_VOLUMES + (year - contYears))));
 		cellReleasesQtty.setCellStyle(tableBodyStyle);
 		contYears--;
 	    }
@@ -384,31 +378,31 @@ public class ExcelGenerator {
 
     private void generatePastYearNewSeriesTable(XSSFSheet sheetStatistics, int year, CellStyle headerStyle,
 	    CellStyle tableBodyStyle) {
-	Row rowHeader = sheetStatistics.getRow(49);
+	Row rowHeader = sheetStatistics.getRow(ExcelConstants.Cell.NEW_SERIES);
 	if (rowHeader == null) {
-	    rowHeader = sheetStatistics.createRow(49);
+	    rowHeader = sheetStatistics.createRow(ExcelConstants.Cell.NEW_SERIES);
 	}
-	Cell cellReleasesHeaderYear = rowHeader.createCell(3);
-	cellReleasesHeaderYear.setCellValue("Año");
+	Cell cellReleasesHeaderYear = rowHeader.createCell(ExcelConstants.Cell.THIRD);
+	cellReleasesHeaderYear.setCellValue(ExcelConstants.TABLE_COLUMN_YEAR_LABEL);
 	cellReleasesHeaderYear.setCellStyle(headerStyle);
-	Cell cellReleasesHeaderQtty = rowHeader.createCell(4);
-	cellReleasesHeaderQtty.setCellValue("Series nuevas");
+	Cell cellReleasesHeaderQtty = rowHeader.createCell(ExcelConstants.Cell.FOURTH);
+	cellReleasesHeaderQtty.setCellValue(ExcelConstants.TABLE_COLUMN_NEW_RELEASES_LABEL);
 	cellReleasesHeaderQtty.setCellStyle(headerStyle);
 
 	ExcelConfig config = new ExcelConfig();
 	int contYears = 5;
 	for (int i = 1; i < 6; i++) {
-	    if (config.getProperty("year.newSeries." + (year - contYears)) != null) {
+	    if (config.getProperty(ExcelConstants.EXCEL_PROPERTY_YEAR_NEW_SERIES + (year - contYears)) != null) {
 		Row row = sheetStatistics.getRow(rowHeader.getRowNum() + i);
 		if (row == null) {
 		    row = sheetStatistics.createRow(rowHeader.getRowNum() + i);
 		}
-		Cell cellReleasesYear = row.createCell(3);
+		Cell cellReleasesYear = row.createCell(ExcelConstants.Cell.THIRD);
 		cellReleasesYear.setCellValue(year - contYears);
 		cellReleasesYear.setCellStyle(tableBodyStyle);
-		Cell cellReleasesQtty = row.createCell(4);
+		Cell cellReleasesQtty = row.createCell(ExcelConstants.Cell.FOURTH);
 		cellReleasesQtty
-			.setCellValue(Integer.valueOf(config.getProperty("year.newSeries." + (year - contYears))));
+			.setCellValue(Integer.valueOf(config.getProperty(ExcelConstants.EXCEL_PROPERTY_YEAR_NEW_SERIES + (year - contYears))));
 		cellReleasesQtty.setCellStyle(tableBodyStyle);
 		contYears--;
 	    }
@@ -417,7 +411,7 @@ public class ExcelGenerator {
 
     private XSSFSheet generateThirdSheet(XSSFWorkbook excel, int[] conts) {
 	XSSFSheet sheetStatistics = excel.getSheetAt(1);
-	XSSFSheet sheetCharts = excel.createSheet("Gráficas");
+	XSSFSheet sheetCharts = excel.createSheet(ExcelConstants.THIRD_SHEET_NAME);
 	createCharts(sheetStatistics, sheetCharts, conts);
 	return sheetCharts;
     }
@@ -434,8 +428,8 @@ public class ExcelGenerator {
     private void createPublisherChart(XSSFSheet sheetStatistics, XSSFSheet sheetCharts, int[] conts) {
 	// Generación de gráfico editoriales
 	XSSFDrawing pieChartDrawing = sheetCharts.createDrawingPatriarch();
-	XSSFChart pieChart = pieChartDrawing.createChart(pieChartDrawing.createAnchor(0, 0, 0, 0, 0, 2, 8, 14));
-	pieChart.setTitleText("Distribución de Editoriales");
+	XSSFChart pieChart = pieChartDrawing.createChart(pieChartDrawing.createAnchor(0, 0, 0, 0, 0, 2, 8, ExcelConstants.Row.PUBLISHER_CHART));
+	pieChart.setTitleText(ExcelConstants.GRAPH_PUBLISHER_LABEL);
 	pieChart.setTitleOverlay(false);
 	pieChart.getOrAddLegend().setPosition(LegendPosition.RIGHT);
 
@@ -445,34 +439,35 @@ public class ExcelGenerator {
 		new CellRangeAddress(1, conts[1] > 10 ? 10 : conts[1] - 1, 1, 1));
 
 	XDDFPieChartData data = (XDDFPieChartData) pieChart.createData(ChartTypes.PIE, null, null);
-	data.addSeries(categories, values).setTitle("Editoriales", null);
+	data.addSeries(categories, values).setTitle(ExcelConstants.GRAPH_PUBLISHER_LEYEND_LABEL, null);
 	pieChart.plot(data);
     }
 
     private void createMonthTable(int[] conts, XSSFSheet sheetReleases, XSSFSheet sheetStatistics,
 	    CellStyle headerStyle, CellStyle tableBodyStyle) {
 	// genero un array de meses para crear un hashmap y así tenerlos ordenaicos
-	String[] mesesOrdenados = { "enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
-		"septiembre", "octubre", "noviembre", "diciembre" };
+
+	Locale localeEs = Locale.of("es", "ES");
 	Map<String, Integer> novedadesPorMes = new LinkedHashMap<>();
-	for (String mes : mesesOrdenados) {
-	    novedadesPorMes.put(mes, 0);
-	}
+        for (Month mes : Month.values()) {
+            String nombreMes = mes.getDisplayName(TextStyle.FULL, localeEs).toLowerCase(localeEs);
+            novedadesPorMes.put(nombreMes, 0);
+        }
 	// Contaje de repeticiones de mes
 	DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("MMMM", Locale.forLanguageTag("es-ES"));
 	for (Row rowi : sheetReleases) {
-	    Cell cell = rowi.getCell(1);
+	    Cell cell = rowi.getCell(ExcelConstants.Cell.FIRST);
 	    if (cell != null && cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
 		LocalDate date = cell.getLocalDateTimeCellValue().toLocalDate();
-		String month = date.format(monthFormatter);
+		String month = date.format(monthFormatter).toLowerCase();
 		novedadesPorMes.put(month, novedadesPorMes.get(month) + 1);
 	    }
 	}
 
 	conts[2] = conts[1] + 1;
 	Row tempRow = sheetStatistics.createRow(conts[2]++);
-	tempRow.createCell(0).setCellValue("Mes");
-	tempRow.createCell(1).setCellValue("Novedades");
+	tempRow.createCell(0).setCellValue(ExcelConstants.TABLE_COLUMN_MONTH_LABEL);
+	tempRow.createCell(1).setCellValue(ExcelConstants.TABLE_COLUMN_NEWS_LABEL);
 	tempRow.getCell(0).setCellStyle(headerStyle);
 	tempRow.getCell(1).setCellStyle(headerStyle);
 	for (Map.Entry<String, Integer> entry : novedadesPorMes.entrySet()) {
@@ -487,8 +482,8 @@ public class ExcelGenerator {
     private void createMonthChart(XSSFSheet sheetStatistics, XSSFSheet sheetCharts, int[] conts) {
 
 	XSSFDrawing monthChartDrawing = sheetCharts.createDrawingPatriarch();
-	XSSFChart monthChart = monthChartDrawing.createChart(monthChartDrawing.createAnchor(0, 0, 0, 0, 0, 17, 15, 35));
-	monthChart.setTitleText("Lanzamientos por meses");
+	XSSFChart monthChart = monthChartDrawing.createChart(monthChartDrawing.createAnchor(0, 0, 0, 0, 0, ExcelConstants.Row.MONTH_CHART_START, 15, ExcelConstants.Row.MONTH_CHART_END));
+	monthChart.setTitleText(ExcelConstants.GRAPH_BY_MONTH_LABEL);
 	monthChart.setTitleOverlay(false);
 	monthChart.getOrAddLegend().setPosition(LegendPosition.BOTTOM);
 
@@ -502,7 +497,7 @@ public class ExcelGenerator {
 		new CellRangeAddress(conts[1] + 2, conts[2] - 1, 1, 1));
 
 	XDDFBarChartData mothData = (XDDFBarChartData) monthChart.createData(ChartTypes.BAR, bottomAxis, leftAxis);
-	mothData.addSeries(months, releases).setTitle("Novedades por Mes", null);
+	mothData.addSeries(months, releases).setTitle(ExcelConstants.GRAPH_BY_MONTH_LEYEND_LABEL, null);
 	monthChart.plot(mothData);
     }
 
@@ -510,19 +505,19 @@ public class ExcelGenerator {
 
 	XSSFDrawing yearReleasesChartDrawing = sheetCharts.createDrawingPatriarch();
 	XSSFChart chart = yearReleasesChartDrawing
-		.createChart(yearReleasesChartDrawing.createAnchor(0, 0, 0, 0, 0, 38, 15, 48));
+		.createChart(yearReleasesChartDrawing.createAnchor(0, 0, 0, 0, 0, ExcelConstants.Row.YEAR_RELEASES_CHART_START, 15, ExcelConstants.Row.YEAR_RELEASES_CHART_END));
 
 	chart.plot(
-		generateChartData(sheetStatistics, "Lanzamientos años anteriores", "Novedades en los años", chart, 20));
+		generateChartData(sheetStatistics, ExcelConstants.GRAPH_LAST_YEAR_RELEASES_LABEL, ExcelConstants.GRAPH_LAST_YEAR_RELEASES_LEYEND_LABEL, chart, 20));
     }
 
     private void createYearClosedChart(XSSFSheet sheetStatistics, XSSFSheet sheetCharts) {
 
 	XSSFDrawing yearReleasesChartDrawing = sheetCharts.createDrawingPatriarch();
 	XSSFChart chart = yearReleasesChartDrawing
-		.createChart(yearReleasesChartDrawing.createAnchor(0, 0, 0, 0, 0, 51, 15, 61));
+		.createChart(yearReleasesChartDrawing.createAnchor(0, 0, 0, 0, 0, ExcelConstants.Row.YEAR_CLOSED_CHART_START, 15, ExcelConstants.Row.YEAR_CLOSED_CHART_END));
 
-	chart.plot(generateChartData(sheetStatistics, "Series cerradas años anteriores", "Series cerradas en los años",
+	chart.plot(generateChartData(sheetStatistics, ExcelConstants.GRAPH_LAST_YEAR_CLOSED_LABEL, ExcelConstants.GRAPH_LAST_YEAR_CLOSED_LEYEND_LABEL,
 		chart, 30));
     }
 
@@ -530,9 +525,9 @@ public class ExcelGenerator {
 
 	XSSFDrawing yearReleasesChartDrawing = sheetCharts.createDrawingPatriarch();
 	XSSFChart chart = yearReleasesChartDrawing
-		.createChart(yearReleasesChartDrawing.createAnchor(0, 0, 0, 0, 0, 63, 15, 73));
+		.createChart(yearReleasesChartDrawing.createAnchor(0, 0, 0, 0, 0, ExcelConstants.Row.YEAR_ONLY_VOLUMES_CHART_START, 15, ExcelConstants.Row.YEAR_ONLY_VOLUMES_CHART_END));
 
-	chart.plot(generateChartData(sheetStatistics, "Tomos únicos años anteriores", "Tomos únicos en los años", chart,
+	chart.plot(generateChartData(sheetStatistics, ExcelConstants.GRAPH_LAST_YEAR_ONLY_VOLUMES_LABEL, ExcelConstants.GRAPH_LAST_YEAR_ONLY_VOLUMES_LEYEND_LABEL, chart,
 		40));
     }
 
@@ -540,9 +535,9 @@ public class ExcelGenerator {
 
 	XSSFDrawing yearReleasesChartDrawing = sheetCharts.createDrawingPatriarch();
 	XSSFChart chart = yearReleasesChartDrawing
-		.createChart(yearReleasesChartDrawing.createAnchor(0, 0, 0, 0, 0, 76, 15, 86));
+		.createChart(yearReleasesChartDrawing.createAnchor(0, 0, 0, 0, 0, ExcelConstants.Row.YEAR_NEW_SERIES_CHART_START, 15, ExcelConstants.Row.YEAR_NEW_SERIES_CHART_END));
 
-	chart.plot(generateChartData(sheetStatistics, "Series nuevas años anteriores", "Series nuevas en los años",
+	chart.plot(generateChartData(sheetStatistics, ExcelConstants.GRAPH_LAST_YEAR_NEW_LABEL, ExcelConstants.GRAPH_LAST_YEAR_NEW_LEYEND_LABEL,
 		chart, 50));
     }
 
@@ -558,9 +553,9 @@ public class ExcelGenerator {
 	leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
 
 	XDDFDataSource<String> dataX = XDDFDataSourcesFactory.fromStringCellRange(sheetStatistics,
-		new CellRangeAddress(dataInitColum, dataInitColum + 4, 3, 3));
+		new CellRangeAddress(dataInitColum, dataInitColum + 4, ExcelConstants.Cell.THIRD, ExcelConstants.Cell.THIRD));
 	XDDFNumericalDataSource<Double> dataY = XDDFDataSourcesFactory.fromNumericCellRange(sheetStatistics,
-		new CellRangeAddress(dataInitColum, dataInitColum + 4, 4, 4));
+		new CellRangeAddress(dataInitColum, dataInitColum + 4, ExcelConstants.Cell.FOURTH, ExcelConstants.Cell.FOURTH));
 	XDDFChartData chartData = chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
 	chartData.addSeries(dataX, dataY).setTitle(chartTitle, null);
 
@@ -573,7 +568,7 @@ public class ExcelGenerator {
 	headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
 	XSSFFont font = (excel).createFont();
-	font.setFontName("Arial");
+	font.setFontName(ExcelConstants.FONT);
 	font.setFontHeightInPoints((short) 16);
 	font.setBold(true);
 	headerStyle.setFont(font);
@@ -607,7 +602,7 @@ public class ExcelGenerator {
     private CellStyle createDatesStyle(XSSFWorkbook excel) {
 	CellStyle cellStyleDate = excel.createCellStyle();
 	CreationHelper createHelper = excel.getCreationHelper();
-	cellStyleDate.setDataFormat(createHelper.createDataFormat().getFormat("MMMM/dd/yyyy"));
+	cellStyleDate.setDataFormat(createHelper.createDataFormat().getFormat(ExcelConstants.DATETIME_FORMAT));
 	cellStyleDate.setFillForegroundColor(IndexedColors.SEA_GREEN.getIndex());
 	cellStyleDate.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 	cellStyleDate.setWrapText(true);
